@@ -5,7 +5,7 @@ const Sidebar = ({ isOpen, onClose, onViewChange, activeView }) => {
     const menuItems = [
         { id: 'dashboard', label: 'لوحة التحكم', icon: Home },
         { id: 'profile', label: 'الملف الطبي', icon: User },
-        { id: 'lab-results', label: 'التحاليل والتقارير', icon: FileText },
+        { id: 'lab-results', label: 'التحاليل والكشوفات', icon: FileText },
         { id: 'reports', label: 'التقارير الصحية', icon: BarChart3 },
         { id: 'assistant', label: 'المساعد أصـيل', icon: Sparkles },
         { id: 'settings', label: 'الإعـدادات', icon: Settings },

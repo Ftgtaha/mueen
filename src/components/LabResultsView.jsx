@@ -32,7 +32,7 @@ const LabResultsView = ({ onBack }) => {
                 <button onClick={onBack} className="p-2 hover:bg-white/5 rounded-full transition-colors">
                     <ArrowLeft className="w-5 h-5 text-gray-400 rotate-180" />
                 </button>
-                <h1 className="text-xl font-bold text-white">التحاليل والتقارير الطبية</h1>
+                <h1 className="text-xl font-bold text-white">التحاليل والكشوفات الطبية</h1>
                 <div className="w-10" />
             </div>
 
