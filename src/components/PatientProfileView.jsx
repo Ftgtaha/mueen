@@ -161,9 +161,9 @@ const PatientProfileView = ({ patientData, onBack }) => {
                                         className="text-[10px] bg-mueen-cyan/10 text-mueen-cyan px-3 py-1 rounded-full flex items-center gap-1 border border-mueen-cyan/20 hover:bg-mueen-cyan/20 transition-all font-bold"
                                     >
                                         <Plus className="w-3 h-3" />
-                                        إضافة بلعة (وجبة)
+                                        إضافة جرعة (وجبة)
                                     </button>
-                                    <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">جرعات البلع (Bolus)</label>
+                                    <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">جرعات الوجبات (Doses)</label>
                                 </div>
 
                                 <div className="grid grid-cols-1 gap-2">
@@ -184,7 +184,7 @@ const PatientProfileView = ({ patientData, onBack }) => {
                                                     className="bg-transparent border-none text-white text-md font-bold flex-1 text-center focus:ring-0 outline-none p-0"
                                                     placeholder="0"
                                                 />
-                                                <label className="text-[10px] text-gray-500 font-bold min-w-[50px] text-left">بلعة {idx + 1}</label>
+                                                <label className="text-[10px] text-gray-500 font-bold min-w-[50px] text-left">جرعة {idx + 1}</label>
                                             </div>
                                         </div>
                                     ))}
@@ -252,9 +252,9 @@ const PatientProfileView = ({ patientData, onBack }) => {
 
                     {/* Smart Analysis Card */}
                     <div className={`mt-8 p-5 rounded-3xl border relative overflow-hidden transition-all duration-700 ${status.status === 'perfect' ? 'bg-green-500/5 border-green-500/20' :
-                            status.status === 'high' ? 'bg-yellow-500/10 border-yellow-500/20' :
-                                status.status === 'danger' ? 'bg-red-500/10 border-red-500/20' :
-                                    'bg-white/5 border-white/10 opacity-70'
+                        status.status === 'high' ? 'bg-yellow-500/10 border-yellow-500/20' :
+                            status.status === 'danger' ? 'bg-red-500/10 border-red-500/20' :
+                                'bg-white/5 border-white/10 opacity-70'
                         }`}>
                         <div className="flex items-start gap-4 text-right">
                             <div className="flex-1">

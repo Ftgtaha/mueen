@@ -33,7 +33,7 @@ const LiveVitalsChart = ({ data }) => {
                             axisLine={false}
                             interval={3}
                         />
-                        <YAxis yAxisId="left" domain={[40, 220]} tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} />
+                        <YAxis yAxisId="left" domain={[20, 300]} tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} />
                         <YAxis yAxisId="right" orientation="right" domain={[0, 3]} hide />
                         <Tooltip
                             contentStyle={{ backgroundColor: 'rgba(25, 10, 50, 0.9)', border: '1px solid rgba(41, 121, 255, 0.3)', borderRadius: '12px', backdropBlur: '8px' }}

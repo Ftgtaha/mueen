@@ -21,8 +21,8 @@ const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, c
     const scenarios = [
         { id: 'normal', name: 'سليم (80-180)', icon: Activity, color: 'text-mueen-cyan', num: '1' },
         { id: 'pre_hypo', name: 'تحذير (70-79)', icon: ShieldAlert, color: 'text-yellow-500', num: '2' },
-        { id: 'hypo_danger', name: 'خطر هبوط (<70)', icon: AlertCircle, color: 'text-red-500', num: '3' },
-        { id: 'hyper', name: 'ارتفاع (>180)', icon: ArrowUpCircle, color: 'text-orange-500', num: '6' },
+        { id: 'hypo_danger', name: 'خطر هبوط (20-69)', icon: AlertCircle, color: 'text-red-500', num: '3' },
+        { id: 'hyper', name: 'ارتفاع (300+)', icon: ArrowUpCircle, color: 'text-orange-500', num: '6' },
         { id: 'high_ketones', name: 'خطر كيتونات', icon: Flame, color: 'text-purple-500', num: '7' },
     ];
 
@@ -40,8 +40,8 @@ const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, c
                                 key={s.id}
                                 onClick={() => onStartEmergency(s.id)}
                                 className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all ${currentScenario === s.id
-                                        ? 'bg-white/10 border-white shadow-[0_0_15px_rgba(255,255,255,0.1)]'
-                                        : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                    ? 'bg-white/10 border-white shadow-[0_0_15px_rgba(255,255,255,0.1)]'
+                                    : 'bg-white/5 border-white/10 hover:bg-white/10'
                                     }`}
                             >
                                 <Icon className={`w-4 h-4 mb-1 ${s.color}`} />

@@ -308,11 +308,11 @@ const App = () => {
                 newK = 0.3;
                 break;
             case 'hypo_danger':
-                newG = 40;
+                newG = 20;
                 newK = 0.4;
                 break;
             case 'hyper':
-                newG = 280;
+                newG = 300;
                 newK = 0.5;
                 break;
             case 'high_ketones':
