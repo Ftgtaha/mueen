@@ -4,6 +4,7 @@ import { X, Home, BarChart3, Settings, Sparkles, LogOut } from 'lucide-react';
 const Sidebar = ({ isOpen, onClose, onViewChange, activeView }) => {
     const menuItems = [
         { id: 'dashboard', label: 'لوحة التحكم', icon: Home },
+        { id: 'profile', label: 'الملف الطبي', icon: User },
         { id: 'reports', label: 'التقارير الصحية', icon: BarChart3 },
         { id: 'assistant', label: 'المساعد أصـيل', icon: Sparkles },
         { id: 'settings', label: 'الإعـدادات', icon: Settings },

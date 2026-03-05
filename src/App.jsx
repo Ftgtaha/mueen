@@ -11,6 +11,7 @@ import ReportsView from './components/ReportsView';
 import SmartAssistantView from './components/SmartAssistantView';
 import RegisterView from './components/RegisterView';
 import PatientSelectionView from './components/PatientSelectionView';
+import PatientProfileView from './components/PatientProfileView';
 import { Menu, User, Settings, AlertTriangle, Users } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
@@ -505,6 +506,11 @@ const App = () => {
                     </>
                 ) : activeView === 'reports' ? (
                     <ReportsView onBack={() => setActiveView('dashboard')} />
+                ) : activeView === 'profile' ? (
+                    <PatientProfileView
+                        patientData={patientData}
+                        onBack={() => setActiveView('dashboard')}
+                    />
                 ) : (
                     <SmartAssistantView onBack={() => setActiveView('dashboard')} />
                 )}
