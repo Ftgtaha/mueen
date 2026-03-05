@@ -9,14 +9,25 @@ import LiveVitalsChart from './components/LiveVitalsChart';
 import Sidebar from './components/Sidebar';
 import ReportsView from './components/ReportsView';
 import SmartAssistantView from './components/SmartAssistantView';
-import { Menu, User, Settings, AlertTriangle } from 'lucide-react';
+import RegisterView from './components/RegisterView';
+import PatientSelectionView from './components/PatientSelectionView';
+import { Menu, User, Settings, AlertTriangle, Users } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
 const PATIENT_ID = 'mueen_demo_001'; // Unique identifier for the demo patient
 
-function App() {
-    const [isPaired, setIsPaired] = useState(false);
+const App = () => {
+    // Session & User State
     const [isAdminView, setIsAdminView] = useState(false);
+    const [isRegistered, setIsRegistered] = useState(false);
+    const [patientSessionId, setPatientSessionId] = useState(null);
+    const [patientData, setPatientData] = useState({
+        name: 'جاري التحميل...',
+        age: 24,
+        bloodType: 'O+',
+        phone: '',
+        emergencyPhone: ''
+    });
 
     // View & Sidebar State
     const [activeView, setActiveView] = useState('dashboard'); // dashboard or reports
@@ -26,17 +37,6 @@ function App() {
     const [isScanning, setIsScanning] = useState(false);
     const [hasResult, setHasResult] = useState(false);
     const [scenario, setScenario] = useState('standby');
-
-    // Patient Profile State
-    const [patientData, setPatientData] = useState({
-        name: "سعد بن محمد",
-        age: "45",
-        bloodType: "O+"
-    });
-
-    // Emergency Contact State
-    const [contactName, setContactName] = useState("فهد (الأب)");
-    const [contactPhone, setContactPhone] = useState("05XXXXXXXXX");
 
     // Vitals
     const [glucose, setGlucose] = useState(100);
@@ -71,50 +71,64 @@ function App() {
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
+        let channel;
+
         if (urlParams.get('view') === 'admin') {
             setIsAdminView(true);
-            setIsPaired(true);
+        } else {
+            // Check for existing session
+            const savedSession = localStorage.getItem('mueen_session');
+            if (savedSession) {
+                try {
+                    const data = JSON.parse(savedSession);
+                    setPatientData(data);
+                    setPatientSessionId(data.phone);
+                    setIsRegistered(true);
+                } catch (e) {
+                    console.error("Session restoration failed:", e);
+                }
+            }
         }
 
-        // --- Supabase Real-time Subscription ---
-        const channel = supabase
-            .channel('health_sync')
-            .on('postgres_changes', {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'health_monitor',
-                filter: `short_id=eq.${PATIENT_ID}`
-            }, (payload) => {
-                const data = payload.new;
-                // Sync values across devices
-                if (data.scenario && data.scenario !== scenario) {
+        if (patientSessionId) {
+            // --- Supabase Real-time Subscription ---
+            channel = supabase
+                .channel('health_sync')
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'health_monitor',
+                    filter: `short_id=eq.${patientSessionId}`
+                }, (payload) => {
+                    const data = payload.new;
+                    if (data.scenario && data.scenario !== scenario) {
+                        setScenario(data.scenario);
+                        setHasResult(true);
+                    }
+                    if (data.glucose) setTargetGlucose(data.glucose);
+                    if (data.ketones) setTargetKetones(data.ketones);
+                    if (data.alert_text) setAlertText(data.alert_text);
+                })
+                .subscribe();
+
+            // Initial Fetch
+            const fetchInitial = async () => {
+                const { data } = await supabase
+                    .from('health_monitor')
+                    .select('*')
+                    .eq('short_id', patientSessionId)
+                    .single();
+
+                if (data) {
                     setScenario(data.scenario);
+                    setTargetGlucose(data.glucose);
+                    setTargetKetones(data.ketones);
+                    setAlertText(data.alert_text);
                     setHasResult(true);
                 }
-                if (data.glucose) setTargetGlucose(data.glucose);
-                if (data.ketones) setTargetKetones(data.ketones);
-                if (data.alert_text) setAlertText(data.alert_text);
-            })
-            .subscribe();
-
-        // Initial Fetch
-        const fetchInitial = async () => {
-            const { data } = await supabase
-                .from('health_monitor')
-                .select('*')
-                .eq('short_id', PATIENT_ID)
-                .single();
-
-            if (data) {
-                setScenario(data.scenario);
-                setTargetGlucose(data.glucose);
-                setTargetKetones(data.ketones);
-                setAlertText(data.alert_text);
-                setHasResult(true);
-                setIsPaired(true);
-            }
-        };
-        fetchInitial();
+            };
+            fetchInitial();
+        }
 
         // Generate 24 hours of data
         const initialData = Array.from({ length: 24 }).map((_, i) => {
@@ -127,8 +141,10 @@ function App() {
         });
         setChartData(initialData);
 
-        return () => supabase.removeChannel(channel);
-    }, []);
+        return () => {
+            if (channel) supabase.removeChannel(channel);
+        };
+    }, [patientSessionId]);
 
     // Triggering Specific Voicelines on scenario/alert change
     useEffect(() => {
@@ -357,13 +373,16 @@ function App() {
         silent.play().catch(() => { });
     };
 
-    if (!isPaired) {
-        return <PairingModal onPaired={handleManualPairing} />
+    if (!isRegistered && !isAdminView) {
+        return <RegisterView onComplete={(id, data) => {
+            setPatientSessionId(id);
+            setPatientData(data);
+            setIsRegistered(true);
+        }} />;
     }
 
     return (
-        <div
-            className="min-h-screen pb-40 relative overflow-x-hidden md:max-w-[480px] md:mx-auto md:border-x md:border-white/10 md:shadow-2xl selection:bg-mueen-cyan/30"
+        <div className="min-h-screen relative text-gray-200 overflow-x-hidden selection:bg-mueen-cyan/30"
             style={{ backgroundColor: '#090314' }}
         >
             <header
@@ -391,8 +410,34 @@ function App() {
             />
 
             <main className="p-4 space-y-6">
-                {activeView === 'dashboard' ? (
+                {isAdminView && !patientSessionId ? (
+                    <PatientSelectionView onSelect={(p) => {
+                        setPatientSessionId(p.short_id);
+                        setPatientData({
+                            name: p.patient_name,
+                            phone: p.short_id,
+                            age: p.patient_age || 24,
+                            gender: p.patient_gender || 'غير محدد',
+                            weight: p.patient_weight || '--',
+                            height: p.patient_height || '--',
+                            usePump: p.use_pump || false,
+                            bloodType: 'O+'
+                        });
+                        setGlucose(p.glucose || 100);
+                        setScenario(p.scenario || 'standby');
+                        setHasResult(true);
+                    }} />
+                ) : activeView === 'dashboard' ? (
                     <>
+                        {isAdminView && (
+                            <button
+                                onClick={() => setPatientSessionId(null)}
+                                className="w-full mb-4 p-2 bg-white/5 rounded-xl border border-white/10 text-[10px] text-gray-500 flex items-center justify-center gap-2 hover:bg-white/10 transition-colors"
+                            >
+                                <Users className="w-3 h-3" />
+                                تغيير المريض الحالي
+                            </button>
+                        )}
                         <div className="glass-panel p-4 flex items-center justify-between mb-2" style={{ backgroundColor: 'rgba(26, 11, 60, 0.45)', border: '1px solid rgba(41, 121, 255, 0.2)' }}>
                             <div className="flex items-center space-x-3 space-x-reverse">
                                 <div className="w-10 h-10 rounded-full bg-mueen-blue/20 flex items-center justify-center">
@@ -400,11 +445,25 @@ function App() {
                                 </div>
                                 <div>
                                     <h3 className="text-white text-sm font-bold leading-none">{patientData.name}</h3>
-                                    <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-tighter">Age: {patientData.age} | Blood: {patientData.bloodType}</p>
+                                    <p className="text-[9px] text-gray-500 mt-1.5 flex gap-2 items-center">
+                                        <span>{patientData.age} سنة</span>
+                                        <span className="opacity-30">|</span>
+                                        <span>{patientData.gender}</span>
+                                        <span className="opacity-30">|</span>
+                                        <span>{patientData.weight}كجم</span>
+                                        <span className="opacity-30">|</span>
+                                        <span>{patientData.height}سم</span>
+                                        {patientData.usePump && (
+                                            <>
+                                                <span className="opacity-30">|</span>
+                                                <span className="text-mueen-cyan font-bold">مضخة</span>
+                                            </>
+                                        )}
+                                    </p>
                                 </div>
                             </div>
                             <div className="bg-mueen-cyan/10 px-2 py-1 rounded text-[8px] text-mueen-cyan font-bold uppercase animate-pulse">
-                                Monitoring ON
+                                {isAdminView ? 'Admin Mode' : 'Monitoring ON'}
                             </div>
                         </div>
 
@@ -439,16 +498,11 @@ function App() {
                 )}
             </main>
 
-            {/* PRESENTATION TOOLS */}
-            {isAdminView && activeView === 'dashboard' && (
-                <PresenterControlPanel onScenarioChange={startRescueScan} />
-            )}
-
             <EmergencyCallUI
                 isVisible={emergencyCall}
                 reason={emergencyReason}
-                contactName={contactName}
-                contactPhone={contactPhone}
+                contactName={patientData.emergencyPhone ? "الطوارئ" : "فهد (الأب)"}
+                contactPhone={patientData.emergencyPhone || "05XXXXXXXXX"}
                 onCancel={() => {
                     setEmergencyCall(false);
                     setScenario('normal');
@@ -466,17 +520,16 @@ function App() {
                 onClose={() => setShowCalibration(false)}
             />
 
-            {isAdminView && (
+            {isAdminView && patientSessionId && activeView === 'dashboard' && (
                 <PresenterControlPanel
                     currentScenario={scenario}
-                    onStartEmergency={startRescueScan}
+                    onScenarioChange={startRescueScan}
                     onHardwareInject={handleHardwareInject}
                     onRefill={handleRefill}
                 />
             )}
-
         </div>
     );
-}
+};
 
 export default App;
