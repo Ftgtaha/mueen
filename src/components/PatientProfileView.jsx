@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { User, Activity, Ruler, Weight, Syringe, ShieldCheck, AlertCircle, Info, ArrowLeft, Thermometer, Plus, Trash2, CheckCircle2 } from 'lucide-react';
+import { User, Activity, Ruler, Weight, Syringe, ShieldCheck, AlertCircle, Info, ArrowLeft, Thermometer, Plus, Trash2, CheckCircle2, Zap } from 'lucide-react';
 
 const PatientProfileView = ({ patientData, onBack }) => {
     // State for Pump users
-    const [pumpTotal, setPumpTotal] = useState('');
+    const [pumpBasal, setPumpBasal] = useState('');
+    const [pumpBolusDoses, setPumpBolusDoses] = useState(['']);
 
     // State for Injection users
     const [longActing, setLongActing] = useState('');
-    const [shortActingDoses, setShortActingDoses] = useState(['']); // Array of dose values
+    const [shortActingDoses, setShortActingDoses] = useState(['']);
 
-    // Add/Remove short acting dose fields
-    const addShortActingField = () => setShortActingDoses([...shortActingDoses, '']);
-    const removeShortActingField = (index) => {
-        const newDoses = shortActingDoses.filter((_, i) => i !== index);
-        setShortActingDoses(newDoses.length ? newDoses : ['']);
+    // Generic Add/Remove dose fields
+    const addDoseField = (setter, doses) => setter([...doses, '']);
+    const removeDoseField = (setter, doses, index) => {
+        const newDoses = doses.filter((_, i) => i !== index);
+        setter(newDoses.length ? newDoses : ['']);
     };
-    const updateShortActingDose = (index, value) => {
-        const newDoses = [...shortActingDoses];
+    const updateDoseValue = (setter, doses, index, value) => {
+        const newDoses = [...doses];
         newDoses[index] = value;
-        setShortActingDoses(newDoses);
+        setter(newDoses);
     };
 
     // Calculation logic
@@ -27,7 +28,9 @@ const PatientProfileView = ({ patientData, onBack }) => {
     // Calculate TDD (Total Daily Dose)
     const calculateTDD = () => {
         if (patientData.usePump) {
-            return parseFloat(pumpTotal) || 0;
+            const basal = parseFloat(pumpBasal) || 0;
+            const bolusTotal = pumpBolusDoses.reduce((acc, current) => acc + (parseFloat(current) || 0), 0);
+            return basal + bolusTotal;
         } else {
             const long = parseFloat(longActing) || 0;
             const shortTotal = shortActingDoses.reduce((acc, current) => acc + (parseFloat(current) || 0), 0);
@@ -132,26 +135,69 @@ const PatientProfileView = ({ patientData, onBack }) => {
 
                 <div className="glass-panel p-6 border-white/5 bg-white/5">
                     {patientData.usePump ? (
-                        <div className="space-y-4">
-                            <div className="bg-black/20 p-4 rounded-2xl border border-white/5 text-right">
-                                <label className="text-[10px] text-gray-500 mb-2 block font-bold uppercase">إجمالي الاستهلاك اليومي (Basal + Bolus)</label>
+                        <div className="space-y-6">
+                            {/* Pump Basal */}
+                            <div className="bg-mueen-cyan/5 p-4 rounded-2xl border border-mueen-cyan/10 text-right">
+                                <label className="text-[10px] text-mueen-cyan mb-2 block font-bold uppercase tracking-wider flex items-center justify-end gap-2">
+                                    معدل الضخ القاعدي (إجمالي اليوم) <Zap className="w-3 h-3" />
+                                </label>
                                 <div className="flex items-center gap-4">
                                     <span className="text-mueen-cyan text-sm font-bold">وحدة</span>
                                     <input
                                         type="number"
-                                        value={pumpTotal}
-                                        onChange={(e) => setPumpTotal(e.target.value)}
-                                        className="bg-transparent border-none text-white text-3xl font-bold flex-1 text-center focus:ring-0 outline-none p-0"
-                                        placeholder="0.0"
+                                        value={pumpBasal}
+                                        onChange={(e) => setPumpBasal(e.target.value)}
+                                        className="bg-transparent border-none text-white text-2xl font-bold flex-1 text-center focus:ring-0 outline-none p-0"
+                                        placeholder="0"
                                     />
+                                </div>
+                            </div>
+
+                            {/* Pump Bolus List */}
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between text-right mb-1 px-1">
+                                    <button
+                                        onClick={() => addDoseField(setPumpBolusDoses, pumpBolusDoses)}
+                                        className="text-[10px] bg-mueen-cyan/10 text-mueen-cyan px-3 py-1 rounded-full flex items-center gap-1 border border-mueen-cyan/20 hover:bg-mueen-cyan/20 transition-all font-bold"
+                                    >
+                                        <Plus className="w-3 h-3" />
+                                        إضافة بلعة (وجبة)
+                                    </button>
+                                    <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">جرعات البلع (Bolus)</label>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-2">
+                                    {pumpBolusDoses.map((dose, idx) => (
+                                        <div key={idx} className="flex gap-2 items-center animate-in slide-in-from-right-4 duration-300">
+                                            <button
+                                                onClick={() => removeDoseField(setPumpBolusDoses, pumpBolusDoses, idx)}
+                                                className="p-3 text-red-500/40 hover:text-red-500 transition-colors"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                            <div className="flex-1 flex items-center bg-black/20 px-4 py-3 rounded-xl border border-white/5">
+                                                <span className="text-gray-500 text-[10px] font-bold">وحدة</span>
+                                                <input
+                                                    type="number"
+                                                    value={dose}
+                                                    onChange={(e) => updateDoseValue(setPumpBolusDoses, pumpBolusDoses, idx, e.target.value)}
+                                                    className="bg-transparent border-none text-white text-md font-bold flex-1 text-center focus:ring-0 outline-none p-0"
+                                                    placeholder="0"
+                                                />
+                                                <label className="text-[10px] text-gray-500 font-bold min-w-[50px] text-left">بلعة {idx + 1}</label>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
                     ) : (
                         <div className="space-y-6">
-                            {/* Long Acting */}
+                            {/* Injection Long Acting */}
                             <div className="bg-purple-500/5 p-4 rounded-2xl border border-purple-500/10 text-right">
-                                <label className="text-[10px] text-purple-400/80 mb-2 block font-bold uppercase tracking-wider">إنسولين طويل المفعول (مرة يومياً)</label>
+                                <label className="text-[10px] text-purple-400/80 mb-2 block font-bold uppercase tracking-wider flex items-center justify-end gap-2">
+                                    إنسولين طويل المفعول (قاعدة) <Activity className="w-3 h-3" />
+                                </label>
                                 <div className="flex items-center gap-4">
                                     <span className="text-purple-400 text-sm font-bold">وحدة</span>
                                     <input
@@ -164,24 +210,24 @@ const PatientProfileView = ({ patientData, onBack }) => {
                                 </div>
                             </div>
 
-                            {/* Short Acting List */}
+                            {/* Injection Short Acting List */}
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between text-right mb-1 px-1">
                                     <button
-                                        onClick={addShortActingField}
-                                        className="text-[10px] bg-mueen-cyan/10 text-mueen-cyan px-3 py-1 rounded-full flex items-center gap-1 border border-mueen-cyan/20 hover:bg-mueen-cyan/20 transition-all font-bold"
+                                        onClick={() => addDoseField(setShortActingDoses, shortActingDoses)}
+                                        className="text-[10px] bg-purple-500/10 text-purple-400 px-3 py-1 rounded-full flex items-center gap-1 border border-purple-500/20 hover:bg-purple-500/20 transition-all font-bold"
                                     >
                                         <Plus className="w-3 h-3" />
                                         إضافة جرعة وجبة
                                     </button>
-                                    <label className="text-[10px] text-gray-500 font-bold uppercase">جرعات قصير المفعول (الوجبات)</label>
+                                    <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">جرعات قصير المفعول (الوجبات)</label>
                                 </div>
 
                                 <div className="grid grid-cols-1 gap-2">
                                     {shortActingDoses.map((dose, idx) => (
                                         <div key={idx} className="flex gap-2 items-center animate-in slide-in-from-right-4 duration-300">
                                             <button
-                                                onClick={() => removeShortActingField(idx)}
+                                                onClick={() => removeDoseField(setShortActingDoses, shortActingDoses, idx)}
                                                 className="p-3 text-red-500/40 hover:text-red-500 transition-colors"
                                             >
                                                 <Trash2 className="w-4 h-4" />
@@ -191,7 +237,7 @@ const PatientProfileView = ({ patientData, onBack }) => {
                                                 <input
                                                     type="number"
                                                     value={dose}
-                                                    onChange={(e) => updateShortActingDose(idx, e.target.value)}
+                                                    onChange={(e) => updateDoseValue(setShortActingDoses, shortActingDoses, idx, e.target.value)}
                                                     className="bg-transparent border-none text-white text-md font-bold flex-1 text-center focus:ring-0 outline-none p-0"
                                                     placeholder="0"
                                                 />
@@ -224,7 +270,7 @@ const PatientProfileView = ({ patientData, onBack }) => {
                                     <div className="mt-4 flex items-center justify-end gap-3 pt-3 border-t border-white/5">
                                         <div className="text-right">
                                             <span className="block text-[8px] text-gray-500 uppercase font-bold tracking-wider">الإجمالي</span>
-                                            <span className="text-sm font-bold text-white">{tdd} <span className="text-[10px] text-gray-500">وحدة</span></span>
+                                            <span className="text-sm font-bold text-white">{tdd.toFixed(1)} <span className="text-[10px] text-gray-500">وحدة</span></span>
                                         </div>
                                         <div className="w-px h-6 bg-white/10" />
                                         <div className="text-right">

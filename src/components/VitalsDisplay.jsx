@@ -79,7 +79,7 @@ const VitalsDisplay = ({ glucose, ketones, glucagonLevel, battery, isScanning, h
                 <div className="glass-panel p-3 flex items-center justify-between">
                     <div className="flex items-center space-x-2 space-x-reverse">
                         <Battery className="w-4 h-4 text-green-400" />
-                        <span className="text-gray-400 text-[10px] font-medium leading-tight">بطارية القلم</span>
+                        <span className="text-gray-400 text-[10px] font-medium leading-tight">البطارية</span>
                     </div>
                     <span className="text-sm font-bold">{battery}%</span>
                 </div>
