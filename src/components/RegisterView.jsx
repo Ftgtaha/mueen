@@ -59,8 +59,8 @@ const RegisterView = ({ onComplete }) => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col p-6 items-center justify-center animate-in fade-in duration-700" style={{ backgroundColor: '#090314' }}>
-            <div className="w-full max-w-md space-y-6">
+        <div className="min-h-screen flex flex-col p-4 sm:p-6 items-center justify-center animate-in fade-in duration-700" style={{ backgroundColor: '#090314' }}>
+            <div className="w-full max-w-sm sm:max-w-md space-y-6">
                 <div className="text-center">
                     <div className="w-16 h-16 bg-mueen-cyan/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-mueen-cyan/20">
                         <HeartPulse className="w-8 h-8 text-mueen-cyan" />
@@ -172,7 +172,7 @@ const RegisterView = ({ onComplete }) => {
                                 onClick={() => setUsePump(!usePump)}
                                 className={`w-10 h-5 rounded-full transition-colors relative ${usePump ? 'bg-mueen-cyan' : 'bg-gray-700'}`}
                             >
-                                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${usePump ? 'left-0.5' : 'left-5.5'}`} />
+                                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${usePump ? 'left-[2px]' : 'left-[22px]'}`} />
                             </button>
                         </div>
                     </div>
