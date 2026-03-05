@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-mueen-dark text-white font-sans antialiased;
+    background-image: radial-gradient(circle at 50% 0%, rgba(0, 229, 255, 0.1) 0%, rgba(9, 3, 20, 1) 70%);
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-mueen-glass backdrop-blur-md border border-mueen-blue/20 rounded-2xl;
+    box-shadow: 0 8px 32px rgba(13, 2, 28, 0.4);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+  }
+
+  .glow-red {
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+  }
+}
