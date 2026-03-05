@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Activity, Ruler, Weight, SyringeRow, ShieldCheck, AlertCircle, Info, ArrowLeft, Thermometer } from 'lucide-react';
+import { User, Activity, Ruler, Weight, Syringe, ShieldCheck, AlertCircle, Info, ArrowLeft, Thermometer } from 'lucide-react';
 
 const PatientProfileView = ({ patientData, onBack }) => {
     const [longActing, setLongActing] = useState(0);
@@ -145,9 +145,9 @@ const PatientProfileView = ({ patientData, onBack }) => {
 
                     {/* Analysis result */}
                     <div className={`mt-8 p-4 rounded-2xl border ${status.status === 'perfect' ? 'bg-green-500/5 border-green-500/20' :
-                            status.status === 'high' ? 'bg-yellow-500/5 border-yellow-500/20' :
-                                status.status === 'danger' ? 'bg-red-500/5 border-red-500/20' :
-                                    'bg-white/5 border-white/10'
+                        status.status === 'high' ? 'bg-yellow-500/5 border-yellow-500/20' :
+                            status.status === 'danger' ? 'bg-red-500/5 border-red-500/20' :
+                                'bg-white/5 border-white/10'
                         } transition-all duration-500`}>
                         <div className="flex items-start gap-3 text-right">
                             <div className="flex-1">
