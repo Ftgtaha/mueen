@@ -14,7 +14,7 @@ import PatientSelectionView from './components/PatientSelectionView';
 import { Menu, User, Settings, AlertTriangle, Users } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
-const PATIENT_ID = 'mueen_demo_001'; // Unique identifier for the demo patient
+
 
 const App = () => {
     // Session & User State
@@ -329,7 +329,7 @@ const App = () => {
         const { error } = await supabase
             .from('health_monitor')
             .upsert({
-                short_id: PATIENT_ID,
+                short_id: patientSessionId,
                 patient_name: patientData.name || "مستخدِم مُعين",
                 glucose: newG,
                 ketones: newK,
@@ -340,7 +340,7 @@ const App = () => {
         if (error) console.error("Supabase Error:", error);
     };
 
-    const handleHardwareInject = () => {
+    const handleHardwareInject = async () => {
         if (glucagon > 0.1) {
             playVoice('inject_success');
             setGlucagon(prev => Math.max(0, prev - 0.2));
@@ -348,9 +348,21 @@ const App = () => {
             setEmergencyCall(false);
             if (rescueTimerRef.current) clearTimeout(rescueTimerRef.current);
             rescueTimerRef.current = null;
-            setAlertText("تم الحقن بنجاح.. أبشر بالعافية، جاري مراقبة حالتك.");
+            const successMsg = "تم الحقن بنجاح.. أبشر بالعافية، جاري مراقبة حالتك.";
+            setAlertText(successMsg);
             setTargetGlucose(105);
             setTargetKetones(0.2);
+
+            // Sync injection state to patient
+            await supabase
+                .from('health_monitor')
+                .update({
+                    scenario: 'recovering',
+                    glucose: 105,
+                    ketones: 0.2,
+                    alert_text: successMsg
+                })
+                .eq('short_id', patientSessionId);
         }
     };
 
@@ -523,7 +535,7 @@ const App = () => {
             {isAdminView && patientSessionId && activeView === 'dashboard' && (
                 <PresenterControlPanel
                     currentScenario={scenario}
-                    onScenarioChange={startRescueScan}
+                    onStartEmergency={startRescueScan}
                     onHardwareInject={handleHardwareInject}
                     onRefill={handleRefill}
                 />
