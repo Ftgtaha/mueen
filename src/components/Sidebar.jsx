@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Home, BarChart3, Settings, Sparkles, LogOut } from 'lucide-react';
+import { X, Home, BarChart3, Settings, Sparkles, LogOut, User } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose, onViewChange, activeView }) => {
     const menuItems = [
