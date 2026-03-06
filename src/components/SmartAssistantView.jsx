@@ -45,8 +45,8 @@ const SmartAssistantView = ({ onBack }) => {
                     <ChevronLeft className="w-6 h-6 rotate-180" />
                 </button>
                 <div className="flex items-center mr-2">
-                    <div className="w-10 h-10 rounded-full bg-mueen-cyan/20 flex items-center justify-center ml-3">
-                        <Sparkles className="w-5 h-5 text-mueen-cyan" />
+                    <div className="w-10 h-10 rounded-full bg-mueen-cyan/10 flex items-center justify-center ml-3 overflow-hidden border border-mueen-cyan/30">
+                        <img src="/معين 2.jpeg" alt="Asseel" className="w-full h-full object-cover" />
                     </div>
                     <div>
                         <h1 className="text-lg font-bold text-white leading-none">أصـيل</h1>

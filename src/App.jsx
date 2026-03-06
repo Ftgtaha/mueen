@@ -58,6 +58,7 @@ const App = () => {
 
     const rescueTimerRef = useRef(null);
     const audioRef = useRef(null);
+    const playedAlertsRef = useRef(new Set());
     const sosSequenceRef = useRef(null);
 
     const playVoice = (voiceId, onFinish) => {
@@ -81,6 +82,11 @@ const App = () => {
         };
 
         const filename = voiceMap[voiceId] || voiceId;
+
+        // Deduplication check: Don't repeat the exact same voice text in a row
+        if (playedAlertsRef.current.has(filename)) return;
+        playedAlertsRef.current.add(filename);
+
         const audio = new Audio(`/voice/${filename}.mp3`);
         audioRef.current = audio;
 
@@ -273,6 +279,8 @@ const App = () => {
                     nextAlert = "ابشرك سكرك في المستوى الامن.";
                 }
             }
+            // Reset played alerts when back to normal
+            playedAlertsRef.current.clear();
         }
 
         if (nextAlert !== alertText) {
