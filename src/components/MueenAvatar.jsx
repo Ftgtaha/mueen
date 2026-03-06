@@ -7,10 +7,15 @@ const MueenAvatar = ({ scenario, alertText, isSpeaking }) => {
     useEffect(() => {
         if (videoRef.current) {
             if (isSpeaking) {
+                // Ensure it starts from second 2.0 if it's currently at the forced pause state
+                if (videoRef.current.currentTime < 2) {
+                    videoRef.current.currentTime = 2;
+                }
                 videoRef.current.play().catch(e => console.log("Video play check:", e));
             } else {
                 videoRef.current.pause();
-                videoRef.current.currentTime = 0;
+                // Reset to second 2.0 instead of 0 to skip the initial closed-eyes frame
+                videoRef.current.currentTime = 2;
             }
         }
     }, [isSpeaking]);

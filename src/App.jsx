@@ -281,9 +281,15 @@ const App = () => {
                     }
                 }
             } else if (scenario === 'normal') {
-                if (alertText !== "ابشرك سكرك في المستوى الامن.") {
-                    playVoice('result_normal');
-                    nextAlert = "ابشرك سكرك في المستوى الامن.";
+                if (currentG >= 80 && currentG <= 180) {
+                    if (alertText !== "ابشرك سكرك في المستوى الامن.") {
+                        playVoice('result_normal');
+                        nextAlert = "ابشرك سكرك في المستوى الامن.";
+                    }
+                } else {
+                    if (alertText === "ابشرك سكرك في المستوى الامن." || alertText === "جاري مراقبة حالتك...") {
+                        nextAlert = "جاري العودة للمستوى الطبيعي...";
+                    }
                 }
             } else if (scenario === 'recovering') {
                 if (currentG >= 80) {
