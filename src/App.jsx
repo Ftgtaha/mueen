@@ -412,6 +412,13 @@ const App = () => {
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('mueen_session');
+        setPatientSessionId(null);
+        setIsRegistered(false);
+        setIsSidebarOpen(false);
+    };
+
     const handleRefill = () => {
         playVoice('refill_success');
         setGlucagon(2);
@@ -448,6 +455,7 @@ const App = () => {
                     if (view === 'settings') setShowCalibration(true);
                     else setActiveView(view);
                 }}
+                onLogout={handleLogout}
                 activeView={activeView}
             />
 
@@ -573,15 +581,17 @@ const App = () => {
                 onClose={() => setShowCalibration(false)}
             />
 
-            {isAdminView && patientSessionId && activeView === 'dashboard' && (
-                <PresenterControlPanel
-                    currentScenario={scenario}
-                    onStartEmergency={startRescueScan}
-                    onHardwareInject={handleHardwareInject}
-                    onRefill={handleRefill}
-                />
-            )}
-        </div>
+            {
+                isAdminView && patientSessionId && activeView === 'dashboard' && (
+                    <PresenterControlPanel
+                        currentScenario={scenario}
+                        onStartEmergency={startRescueScan}
+                        onHardwareInject={handleHardwareInject}
+                        onRefill={handleRefill}
+                    />
+                )
+            }
+        </div >
     );
 };
 

@@ -57,7 +57,10 @@ const Sidebar = ({ isOpen, onClose, onViewChange, activeView }) => {
 
                     {/* Footer / Version */}
                     <div className="p-6 border-t border-white/5 space-y-4">
-                        <button className="w-full flex items-center space-x-3 space-x-reverse text-gray-500 hover:text-red-400 transition-colors px-2 py-2">
+                        <button
+                            onClick={onLogout}
+                            className="w-full flex items-center space-x-3 space-x-reverse text-gray-500 hover:text-red-400 transition-colors px-2 py-2"
+                        >
                             <LogOut className="w-5 h-5" />
                             <span className="text-xs font-bold">تسجيل الخروج</span>
                         </button>
