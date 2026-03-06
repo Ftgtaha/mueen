@@ -166,7 +166,7 @@ const App = () => {
                     setTargetGlucose(data.glucose);
                     setTargetKetones(data.ketones);
                     setAlertText(data.alert_text);
-                    if (data.glucagon !== undefined) setGlucagon(data.glucagon);
+                    if (data.glucagon !== undefined) setGlucagon(data.glucagon > 2 ? 2 : data.glucagon);
                     setHasResult(true);
                 }
             };
