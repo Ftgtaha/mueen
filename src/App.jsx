@@ -280,15 +280,22 @@ const App = () => {
                     nextAlert = "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.";
                 }
             }
-        } else if (scenario === 'normal') {
+        } else if (scenario === 'normal' || scenario === 'recovering') {
             if (glucose >= 80 && glucose <= 180) {
-                if (alertText !== "ابشرك سكرك في المستوى الامن.") {
+                const stabilizedMsg = "أبشرك، استقر الوضع الآن وسكرك في المستوى الآمن.";
+                if (alertText !== stabilizedMsg) {
                     playVoice('result_normal');
-                    nextAlert = "ابشرك سكرك في المستوى الامن.";
+                    setAlertText(stabilizedMsg);
+                    nextAlert = stabilizedMsg;
+                    if (scenario === 'recovering') {
+                        setScenario('normal');
+                        playedAlertsRef.current.clear();
+                    }
                 }
             }
-            // Reset played alerts when back to normal
-            playedAlertsRef.current.clear();
+            if (scenario === 'normal') {
+                playedAlertsRef.current.clear();
+            }
         }
 
         if (nextAlert !== alertText) {
