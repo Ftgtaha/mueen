@@ -16,8 +16,6 @@ import LabResultsView from './components/LabResultsView';
 import { Menu, User, Settings, AlertTriangle, Users } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
-
-
 const App = () => {
     // Session & User State
     const [isAdminView, setIsAdminView] = useState(false);
@@ -32,7 +30,7 @@ const App = () => {
     });
 
     // View & Sidebar State
-    const [activeView, setActiveView] = useState('dashboard'); // dashboard or reports
+    const [activeView, setActiveView] = useState('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Rescue States
@@ -43,7 +41,7 @@ const App = () => {
     // Vitals
     const [glucose, setGlucose] = useState(100);
     const [ketones, setKetones] = useState(0.2);
-    const [glucagon, setGlucagon] = useState(100); // 100 units/doses
+    const [glucagon, setGlucagon] = useState(100);
     const [battery, setBattery] = useState(98);
     const [chartData, setChartData] = useState([]);
 
@@ -61,7 +59,6 @@ const App = () => {
     const rescueTimerRef = useRef(null);
     const audioRef = useRef(null);
 
-    // High-Quality MP3 Voice Manager
     const playVoice = (voiceId, onFinish) => {
         if (audioRef.current) {
             audioRef.current.pause();
@@ -103,7 +100,6 @@ const App = () => {
         if (urlParams.get('view') === 'admin') {
             setIsAdminView(true);
         } else {
-            // Check for existing session
             const savedSession = localStorage.getItem('mueen_session');
             if (savedSession) {
                 try {
@@ -122,7 +118,6 @@ const App = () => {
         }
 
         if (patientSessionId) {
-            // --- Supabase Real-time Subscription ---
             channel = supabase
                 .channel('health_sync')
                 .on('postgres_changes', {
@@ -143,7 +138,6 @@ const App = () => {
                 })
                 .subscribe();
 
-            // Initial Fetch
             const fetchInitial = async () => {
                 const { data } = await supabase
                     .from('health_monitor')
@@ -163,7 +157,6 @@ const App = () => {
             fetchInitial();
         }
 
-        // Generate 24 hours of data
         const initialData = Array.from({ length: 24 }).map((_, i) => {
             const hour = i.toString().padStart(2, '0') + ':00';
             return {
@@ -179,14 +172,12 @@ const App = () => {
         };
     }, [patientSessionId]);
 
-    // Triggering Specific Voicelines on scenario/alert change
     useEffect(() => {
         if (isScanning) {
-            playVoice('scanning'); // "ثواني بس.. جاري فحص السكر..."
+            playVoice('scanning');
         }
     }, [isScanning]);
 
-    // Smooth Transition & Dynamic Alert Engine
     useEffect(() => {
         if (!hasResult) return;
 
@@ -221,7 +212,7 @@ const App = () => {
 
             let nextAlert = alertText;
 
-            // --- EMERGENCY LOGIC (Saudi Dialect UI) ---
+            // --- EMERGENCY LOGIC ---
             if (scenario === 'hypo_danger') {
                 if (currentG < 80 && currentG >= 50) {
                     if (alertText !== "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.") {
@@ -234,23 +225,30 @@ const App = () => {
                         nextAlert = dangerMsg;
                     }
 
-                    if (!rescueTimerRef.current) {
+                    if (rescueTimerRef.current === null) {
                         setEmergencyReason("رصد هبوط حاد في السكر");
+                        rescueTimerRef.current = "SEQUENCE_STARTED";
 
-                        const startSOS = () => {
-                            playVoice('calling_emergency', () => {
+                        const step4_ShowSOS = () => {
+                            setTimeout(() => {
+                                setEmergencyCall(true);
+                            }, 2000); // 2 seconds before SOS UI
+                        };
+
+                        const step3_CallingEmergency = () => {
+                            setTimeout(() => {
+                                playVoice('calling_emergency', step4_ShowSOS);
                                 setAlertText("ماشفنا منك استجابه!! الآن بنتواصل مع اهلك.");
-                                setTimeout(() => setEmergencyCall(true), 1000);
-                            });
+                            }, 3000); // 3 seconds after Danger 2
                         };
 
-                        const playSecondWarning = () => {
-                            rescueTimerRef.current = setTimeout(() => {
-                                playVoice('danger_hypo', startSOS);
-                            }, 3000);
+                        const step2_Danger2 = () => {
+                            setTimeout(() => {
+                                playVoice('danger_hypo', step3_CallingEmergency);
+                            }, 2000); // 2 seconds after Danger 1
                         };
 
-                        playVoice('danger_hypo', playSecondWarning);
+                        playVoice('danger_hypo', step2_Danger2);
                     }
                 }
             } else if (scenario === 'high_ketones') {
@@ -321,6 +319,12 @@ const App = () => {
                 }
             }
 
+            if (scenario !== 'hypo_danger') {
+                if (rescueTimerRef.current === "SEQUENCE_STARTED") {
+                    rescueTimerRef.current = null;
+                }
+            }
+
             if (nextAlert !== alertText) {
                 setAlertText(nextAlert);
             }
@@ -349,53 +353,34 @@ const App = () => {
         setEmergencyCall(false);
         setEmergencyReason("");
 
-        if (rescueTimerRef.current) clearTimeout(rescueTimerRef.current);
-        rescueTimerRef.current = null;
+        if (rescueTimerRef.current) {
+            if (typeof rescueTimerRef.current === 'number') clearTimeout(rescueTimerRef.current);
+            rescueTimerRef.current = null;
+        }
 
         let newG = glucose;
         let newK = ketones;
 
         switch (targetScenario) {
-            case 'normal':
-                newG = 115;
-                newK = 0.2;
-                break;
-            case 'pre_hypo':
-                newG = 74;
-                newK = 0.3;
-                break;
-            case 'hypo_danger':
-                newG = 20;
-                newK = 0.4;
-                break;
-            case 'hyper':
-                newG = 300;
-                newK = 0.5;
-                break;
-            case 'high_ketones':
-                newG = 230;
-                newK = 3.2;
-                break;
-            default:
-                break;
+            case 'normal': newG = 115; newK = 0.2; break;
+            case 'pre_hypo': newG = 74; newK = 0.3; break;
+            case 'hypo_danger': newG = 20; newK = 0.4; break;
+            case 'hyper': newG = 300; newK = 0.5; break;
+            case 'high_ketones': newG = 230; newK = 3.2; break;
+            default: break;
         }
 
         setTargetGlucose(newG);
         setTargetKetones(newK);
 
-        // --- Push to Supabase Cloud ---
-        const { error } = await supabase
-            .from('health_monitor')
-            .upsert({
-                short_id: patientSessionId,
-                patient_name: patientData.name || "مستخدِم مُعين",
-                glucose: newG,
-                ketones: newK,
-                scenario: targetScenario,
-                alert_text: "جاري مراقبة حالتك..." // Default reset text
-            });
-
-        if (error) console.error("Supabase Error:", error);
+        await supabase.from('health_monitor').upsert({
+            short_id: patientSessionId,
+            patient_name: patientData.name || "مستخدِم مُعين",
+            glucose: newG,
+            ketones: newK,
+            scenario: targetScenario,
+            alert_text: "جاري مراقبة حالتك..."
+        });
     };
 
     const handleHardwareInject = async () => {
@@ -404,24 +389,22 @@ const App = () => {
             setGlucagon(prev => Math.max(0, prev - 1));
             setScenario('recovering');
             setEmergencyCall(false);
-            if (rescueTimerRef.current) clearTimeout(rescueTimerRef.current);
-            rescueTimerRef.current = null;
+            if (rescueTimerRef.current) {
+                if (typeof rescueTimerRef.current === 'number') clearTimeout(rescueTimerRef.current);
+                rescueTimerRef.current = null;
+            }
             const successMsg = "بَشّركْ! ... تم الحقن بنجاح.";
             setAlertText(successMsg);
             setTargetGlucose(105);
             setTargetKetones(0.2);
 
-            // Sync injection state to patient
-            await supabase
-                .from('health_monitor')
-                .update({
-                    scenario: 'recovering',
-                    glucose: 105,
-                    ketones: 0.2,
-                    alert_text: successMsg,
-                    glucagon: glucagon - 1
-                })
-                .eq('short_id', patientSessionId);
+            await supabase.from('health_monitor').update({
+                scenario: 'recovering',
+                glucose: 105,
+                ketones: 0.2,
+                alert_text: successMsg,
+                glucagon: glucagon - 1
+            }).eq('short_id', patientSessionId);
         }
     };
 
@@ -429,19 +412,6 @@ const App = () => {
         playVoice('refill_success');
         setGlucagon(100);
         setAlertText("اموركْ طيبه !، تمتْ إعادةْ التعبئة.");
-    };
-
-    const handleManualPairing = (data) => {
-        setPatientData({
-            name: data.patientName,
-            age: data.patientAge,
-            bloodType: data.bloodType
-        });
-        setContactName(data.emergencyName);
-        setContactPhone(data.emergencyPhone);
-        setIsPaired(true);
-        const silent = new Audio();
-        silent.play().catch(() => { });
     };
 
     if (!isRegistered && !isAdminView) {
@@ -456,10 +426,7 @@ const App = () => {
         <div className="min-h-screen relative text-gray-200 overflow-x-hidden selection:bg-mueen-cyan/30"
             style={{ backgroundColor: '#090314' }}
         >
-            <header
-                className="p-4 flex justify-between items-center border-b border-white/5 sticky top-0 z-30"
-                style={{ backgroundColor: '#13051c' }}
-            >
+            <header className="p-4 flex justify-between items-center border-b border-white/5 sticky top-0 z-30" style={{ backgroundColor: '#13051c' }}>
                 <div className="flex items-center">
                     <img src="/logo.png" alt="معين - MUEEN" className="h-16 w-auto" />
                 </div>
@@ -568,10 +535,7 @@ const App = () => {
                 ) : activeView === 'reports' ? (
                     <ReportsView onBack={() => setActiveView('dashboard')} />
                 ) : activeView === 'profile' ? (
-                    <PatientProfileView
-                        patientData={patientData}
-                        onBack={() => setActiveView('dashboard')}
-                    />
+                    <PatientProfileView patientData={patientData} onBack={() => setActiveView('dashboard')} />
                 ) : activeView === 'lab-results' ? (
                     <LabResultsView onBack={() => setActiveView('dashboard')} />
                 ) : (
@@ -588,6 +552,10 @@ const App = () => {
                     setEmergencyCall(false);
                     setScenario('normal');
                     setTargetGlucose(110);
+                    if (rescueTimerRef.current) {
+                        if (typeof rescueTimerRef.current === 'number') clearTimeout(rescueTimerRef.current);
+                        rescueTimerRef.current = null;
+                    }
                 }}
             />
 
