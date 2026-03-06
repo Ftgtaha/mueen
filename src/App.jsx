@@ -43,7 +43,7 @@ const App = () => {
     // Vitals
     const [glucose, setGlucose] = useState(100);
     const [ketones, setKetones] = useState(0.2);
-    const [glucagon, setGlucagon] = useState(1.0);
+    const [glucagon, setGlucagon] = useState(100); // 100 units/doses
     const [battery, setBattery] = useState(98);
     const [chartData, setChartData] = useState([]);
 
@@ -379,9 +379,9 @@ const App = () => {
     };
 
     const handleHardwareInject = async () => {
-        if (glucagon > 0.1) {
+        if (glucagon > 0) {
             playVoice('inject_success');
-            setGlucagon(prev => Math.max(0, prev - 0.2));
+            setGlucagon(prev => Math.max(0, prev - 1));
             setScenario('recovering');
             setEmergencyCall(false);
             if (rescueTimerRef.current) clearTimeout(rescueTimerRef.current);
@@ -406,7 +406,7 @@ const App = () => {
 
     const handleRefill = () => {
         playVoice('refill_success');
-        setGlucagon(1.0);
+        setGlucagon(100);
         setAlertText("اموركْ طيبه !، تمتْ إعادةْ التعبئة.");
     };
 
