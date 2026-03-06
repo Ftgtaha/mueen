@@ -178,115 +178,107 @@ const App = () => {
             playVoice('scanning');
         }
     }, [isScanning]);
-
     // --- MAIN SIMULATION LOOP (Runs every 500ms) ---
     useEffect(() => {
         if (!hasResult) return;
 
         const interval = setInterval(() => {
-            let currentG = glucose;
-            let currentK = ketones;
-
             let stepSizeG = 2;
             if (scenario === 'pre_hypo' || scenario === 'normal' || scenario === 'recovering') {
                 stepSizeG = 1;
             }
 
             setGlucose(prevG => {
-                if (Math.abs(prevG - targetGlucose) <= stepSizeG) {
-                    currentG = targetGlucose;
-                    return targetGlucose;
-                }
+                if (Math.abs(prevG - targetGlucose) <= stepSizeG) return targetGlucose;
                 const direction = targetGlucose > prevG ? 1 : -1;
-                currentG = Math.round(prevG + (direction * stepSizeG));
-                return currentG;
+                return Math.round(prevG + (direction * stepSizeG));
             });
 
             setKetones(prevK => {
-                if (Math.abs(prevK - targetKetones) < 0.05) {
-                    currentK = targetKetones;
-                    return targetKetones;
-                }
+                if (Math.abs(prevK - targetKetones) < 0.05) return targetKetones;
                 const step = targetKetones > prevK ? 0.1 : -0.1;
-                currentK = parseFloat((prevK + step).toFixed(1));
-                return currentK;
-            });
-
-            let nextAlert = alertText;
-
-            // --- VITALS CONDITION MONITORING ---
-            if (scenario === 'hypo_danger') {
-                if (currentG < 80 && currentG >= 50) {
-                    if (alertText !== "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.") {
-                        playVoice('warning_low');
-                        nextAlert = "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.";
-                    }
-                } else if (currentG < 50) {
-                    const dangerMsg = "تحذير، بدا هبوطْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.";
-                    if (alertText !== dangerMsg) {
-                        nextAlert = dangerMsg;
-                    }
-                    // SOS sequence is handled by the dedicated useEffect (Line 292)
-                }
-            } else if (scenario === 'high_ketones') {
-                if (currentK >= 1.5 && currentK < 2.5) {
-                    if (alertText !== "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.") {
-                        playVoice('warning_ketones');
-                        nextAlert = "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.";
-                    }
-                } else if (currentK >= 2.5) {
-                    if (alertText !== "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.") {
-                        playVoice('danger_ketones');
-                        nextAlert = "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.";
-                    }
-                }
-            } else if (scenario === 'hyper') {
-                if (currentG >= 180 && currentG < 250) {
-                    if (alertText !== "انتبه، سكركْ بدا يرتفع  ، بس تأكد بِواسِطَة الدم.") {
-                        playVoice('warning_high');
-                        nextAlert = "انتبه، سكركْ بدا يرتفع  ، بس تأكد بِواسِطَة الدم.";
-                    }
-                } else if (currentG >= 250) {
-                    if (alertText !== "تحذير، بدا ارتفاعْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.") {
-                        playVoice('danger_hyper');
-                        nextAlert = "تحذير، بدا ارتفاعْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.";
-                    }
-                }
-            } else if (scenario === 'pre_hypo') {
-                if (currentG <= 80 && currentG > 70) {
-                    if (alertText !== "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.") {
-                        playVoice('pre_hypo');
-                        nextAlert = "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.";
-                    }
-                }
-            } else if (scenario === 'normal') {
-                if (currentG >= 80 && currentG <= 180) {
-                    if (alertText !== "ابشرك سكرك في المستوى الامن.") {
-                        playVoice('result_normal');
-                        nextAlert = "ابشرك سكرك في المستوى الامن.";
-                    }
-                }
-            }
-
-            if (nextAlert !== alertText) {
-                setAlertText(nextAlert);
-            }
-
-            setChartData(prev => {
-                const newData = [...prev];
-                const lastIdx = newData.length - 1;
-                const jiggleG = currentG + (Math.random() * 2 - 1);
-                newData[lastIdx] = {
-                    ...newData[lastIdx],
-                    glucose: jiggleG,
-                    ketones: currentK
-                };
-                return newData;
+                return parseFloat((prevK + step).toFixed(1));
             });
         }, 500);
 
         return () => clearInterval(interval);
-    }, [hasResult, targetGlucose, targetKetones, scenario, emergencyCall]);
+    }, [hasResult, targetGlucose, targetKetones, scenario]);
+
+    // --- REACTIVE ALERT ENGINE (Listen to vitals & scenario changes) ---
+    useEffect(() => {
+        if (!hasResult || emergencyCall) return;
+
+        let nextAlert = alertText;
+
+        if (scenario === 'hypo_danger') {
+            if (glucose < 80 && glucose >= 50) {
+                if (alertText !== "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.") {
+                    playVoice('warning_low');
+                    nextAlert = "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.";
+                }
+            } else if (glucose < 50) {
+                const dangerMsg = "تحذير، بدا هبوطْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.";
+                if (alertText !== dangerMsg) {
+                    nextAlert = dangerMsg;
+                }
+            }
+        } else if (scenario === 'high_ketones') {
+            if (ketones >= 1.5 && ketones < 2.5) {
+                if (alertText !== "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.") {
+                    playVoice('warning_ketones');
+                    nextAlert = "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.";
+                }
+            } else if (ketones >= 2.5) {
+                if (alertText !== "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.") {
+                    playVoice('danger_ketones');
+                    nextAlert = "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.";
+                }
+            }
+        } else if (scenario === 'hyper') {
+            if (glucose >= 180 && glucose < 250) {
+                if (alertText !== "انتبه، سكركْ بدا يرتفع  ، بس تأكد بِواسِطَة الدم.") {
+                    playVoice('warning_high');
+                    nextAlert = "انتبه، سكركْ بدا يرتفع  ، بس تأكد بِواسِطَة الدم.";
+                }
+            } else if (glucose >= 250) {
+                if (alertText !== "تحذير، بدا ارتفاعْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.") {
+                    playVoice('danger_hyper');
+                    nextAlert = "تحذير، بدا ارتفاعْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.";
+                }
+            }
+        } else if (scenario === 'pre_hypo') {
+            if (glucose <= 80 && glucose > 70) {
+                if (alertText !== "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.") {
+                    playVoice('pre_hypo');
+                    nextAlert = "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.";
+                }
+            }
+        } else if (scenario === 'normal') {
+            if (glucose >= 80 && glucose <= 180) {
+                if (alertText !== "ابشرك سكرك في المستوى الامن.") {
+                    playVoice('result_normal');
+                    nextAlert = "ابشرك سكرك في المستوى الامن.";
+                }
+            }
+        }
+
+        if (nextAlert !== alertText) {
+            setAlertText(nextAlert);
+        }
+
+        // Update chart data in reactive loop
+        setChartData(prev => {
+            const newData = [...prev];
+            const lastIdx = newData.length - 1;
+            const jiggleG = glucose + (Math.random() * 2 - 1);
+            newData[lastIdx] = {
+                ...newData[lastIdx],
+                glucose: jiggleG,
+                ketones: ketones
+            };
+            return newData;
+        });
+    }, [glucose, ketones, scenario, hasResult, alertText, emergencyCall]);
 
     // --- SINGLE-TRIGGER SOS SEQUENCE (Strictly once per incident) ---
     const isHypoDanger = scenario === 'hypo_danger' && glucose < 50;
