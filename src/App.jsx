@@ -226,7 +226,7 @@ const App = () => {
                     if (alertText !== dangerMsg) {
                         nextAlert = dangerMsg;
                     }
-                    // Sequential SOS escalation handled by the dedicated useEffect below
+                    // SOS sequence is handled by the dedicated useEffect (Line 292)
                 }
             } else if (scenario === 'high_ketones') {
                 if (currentK >= 1.5 && currentK < 2.5) {
@@ -288,58 +288,44 @@ const App = () => {
         return () => clearInterval(interval);
     }, [hasResult, targetGlucose, targetKetones, glucose, ketones, scenario, alertText, emergencyCall]);
 
-    // --- DEDICATED STABLE SOS SEQUENCE EFFECT ---
+    // --- SINGLE-TRIGGER SOS SEQUENCE (Strictly once per incident) ---
     useEffect(() => {
         const isHypoDanger = scenario === 'hypo_danger' && glucose < 50;
 
         if (isHypoDanger && !emergencyCall && sosSequenceRef.current === null) {
             setEmergencyReason("رصد هبوط حاد في السكر");
-            sosSequenceRef.current = "ACTIVE_SEQUENCE";
+            sosSequenceRef.current = "SEQUENCE_LOCKED"; // Absolute lock
 
-            // exact sequence timing requested:
-            // 1. Danger 1
-            // 2. Wait 2s
-            // 3. Danger 2
-            // 4. Wait 3s
-            // 5. Calling Emergency Voice
-            // 6. Wait 2s
-            // 7. Show SOS UI
-
-            const step4_LaunchUI = () => {
+            // Timing Chain: Warning (1x) -> 3s Gap -> Calling Voice -> 2s Gap -> UI
+            const step3_ShowUI = () => {
                 sosSequenceRef.current = setTimeout(() => {
                     setEmergencyCall(true);
-                    sosSequenceRef.current = "SOS_UI_PRESENT";
+                    sosSequenceRef.current = "SOS_UI_OPEN"; // UI is now open
                 }, 2000);
             };
 
-            const step3_NoResponse = () => {
+            const step2_NoResponse = () => {
                 sosSequenceRef.current = setTimeout(() => {
-                    playVoice('calling_emergency', step4_LaunchUI);
+                    playVoice('calling_emergency', step3_ShowUI);
                     setAlertText("ماشفنا منك استجابه!! الآن بنتواصل مع اهلك.");
                 }, 3000);
             };
 
-            const step2_RepeatDanger = () => {
-                sosSequenceRef.current = setTimeout(() => {
-                    playVoice('danger_hypo', step3_NoResponse);
-                }, 2000);
+            const step1_Danger = () => {
+                playVoice('danger_hypo', step2_NoResponse);
             };
 
-            const step1_Start = () => {
-                playVoice('danger_hypo', step2_RepeatDanger);
-            };
-
-            step1_Start();
+            step1_Danger();
         }
 
-        // Cleanup: Reset lock if the patient is no longer in critical danger
-        if (!isHypoDanger && scenario !== 'hypo_danger' && glucose >= 80) {
+        // Only allow a sequence reset if glucose goes back to normal for safety
+        if (!isHypoDanger && glucose >= 80) {
             if (sosSequenceRef.current) {
                 if (typeof sosSequenceRef.current === 'number') clearTimeout(sosSequenceRef.current);
                 sosSequenceRef.current = null;
             }
         }
-    }, [scenario, glucose < 50, emergencyCall]);
+    }, [isHypoDanger, emergencyCall]);
 
     const startRescueScan = async (targetScenario) => {
         setHasResult(true);
