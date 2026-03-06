@@ -43,7 +43,11 @@ const MueenAvatar = ({ scenario, alertText, isSpeaking }) => {
                     loop
                     muted
                     playsInline
-                    className="w-full h-full object-cover object-[center_35%] -translate-x-[1.2%]"
+                    className="w-full h-full object-cover"
+                    style={{
+                        objectPosition: 'center 0%',
+                        transform: 'translateX(-1.2%)'
+                    }}
                 />
             </div>
 

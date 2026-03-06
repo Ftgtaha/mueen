@@ -105,7 +105,11 @@ const App = () => {
             if (savedSession) {
                 try {
                     const data = JSON.parse(savedSession);
-                    setPatientData(data);
+                    setPatientData({
+                        ...data,
+                        emergencyName: data.emergency_name || data.emergencyName,
+                        emergencyPhone: data.emergency_phone || data.emergencyPhone
+                    });
                     setPatientSessionId(data.phone);
                     setIsRegistered(true);
                 } catch (e) {
@@ -132,6 +136,7 @@ const App = () => {
                     if (data.glucose) setTargetGlucose(data.glucose);
                     if (data.ketones) setTargetKetones(data.ketones);
                     if (data.alert_text) setAlertText(data.alert_text);
+                    if (data.glucagon !== undefined) setGlucagon(data.glucagon);
                 })
                 .subscribe();
 
@@ -148,6 +153,7 @@ const App = () => {
                     setTargetGlucose(data.glucose);
                     setTargetKetones(data.ketones);
                     setAlertText(data.alert_text);
+                    if (data.glucagon !== undefined) setGlucagon(data.glucagon);
                     setHasResult(true);
                 }
             };
@@ -398,7 +404,8 @@ const App = () => {
                     scenario: 'recovering',
                     glucose: 105,
                     ketones: 0.2,
-                    alert_text: successMsg
+                    alert_text: successMsg,
+                    glucagon: glucagon - 1
                 })
                 .eq('short_id', patientSessionId);
         }
@@ -471,9 +478,12 @@ const App = () => {
                             weight: p.patient_weight || '--',
                             height: p.patient_height || '--',
                             usePump: p.use_pump || false,
+                            emergencyName: p.emergency_name,
+                            emergencyPhone: p.emergency_phone,
                             bloodType: 'O+'
                         });
                         setGlucose(p.glucose || 100);
+                        setGlucagon(p.glucagon !== undefined ? p.glucagon : 100);
                         setScenario(p.scenario || 'standby');
                         setHasResult(true);
                     }} />
@@ -558,7 +568,7 @@ const App = () => {
             <EmergencyCallUI
                 isVisible={emergencyCall}
                 reason={emergencyReason}
-                contactName={patientData.emergencyPhone ? "الطوارئ" : "فهد (الأب)"}
+                contactName={patientData.emergencyName || "فهد (الأب)"}
                 contactPhone={patientData.emergencyPhone || "05XXXXXXXXX"}
                 onCancel={() => {
                     setEmergencyCall(false);
