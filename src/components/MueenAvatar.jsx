@@ -28,6 +28,7 @@ const MueenAvatar = ({ scenario, alertText, isSpeaking }) => {
         pulseClass = 'animate-pulse';
     } else if (scenario === 'pre_hypo' || scenario === 'hyper') {
         glowColor = 'shadow-[0_0_20px_rgba(251,146,60,0.5)]'; // Orange
+        pulseClass = 'animate-pulse';
     } else if (scenario === 'recovery') {
         glowColor = 'shadow-[0_0_20px_rgba(74,222,128,0.5)]'; // Green
     }

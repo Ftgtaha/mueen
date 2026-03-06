@@ -205,8 +205,10 @@ const App = () => {
 
         const interval = setInterval(() => {
             let stepSizeG = 2;
-            if (scenario === 'pre_hypo' || scenario === 'normal' || scenario === 'recovering') {
+            if (scenario === 'pre_hypo' || scenario === 'normal' || scenario === 'recovering' || scenario === 'recovery') {
                 stepSizeG = 1;
+            } else if (scenario === 'hyper') {
+                // No change to stepSizeG, remains 2
             }
 
             setGlucose(prevG => {
@@ -251,6 +253,7 @@ const App = () => {
                 }
             } else if (ketones >= 2.5) {
                 if (alertText !== "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.") {
+                    playVoice('danger_ketones');
                     nextAlert = "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.";
                 }
             }
@@ -261,8 +264,10 @@ const App = () => {
                     nextAlert = "انتبه، سكركْ بدا يرتفع  ، بس تأكد بِواسِطَة الدم.";
                 }
             } else if (glucose >= 250) {
-                if (alertText !== "تحذير، بدا ارتفاعْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.") {
-                    nextAlert = "تحذير، بدا ارتفاعْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.";
+                const dangerHyperMsg = "تحذير، بدا ارتفاعْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.";
+                if (alertText !== dangerHyperMsg) {
+                    playVoice('danger_hyper');
+                    nextAlert = dangerHyperMsg;
                 }
             }
         } else if (scenario === 'pre_hypo') {
@@ -304,7 +309,7 @@ const App = () => {
     // --- SINGLE-TRIGGER SOS SEQUENCE (Strictly once per incident) ---
     const isHypoDanger = scenario === 'hypo_danger' && glucose < 50;
     const isHyperDanger = scenario === 'hyper' && glucose >= 250;
-    const isKetoneDanger = scenario === 'high_ketones' && ketones >= 2.5;
+    const isKetoneDanger = scenario === 'high_ketones' && ketones >= 3.0;
     const isCriticalCondition = isHypoDanger || isHyperDanger || isKetoneDanger;
 
     useEffect(() => {
@@ -377,7 +382,7 @@ const App = () => {
             case 'pre_hypo': newG = 74; newK = 0.3; break;
             case 'hypo_danger': newG = 20; newK = 0.4; break;
             case 'hyper': newG = 300; newK = 0.5; break;
-            case 'high_ketones': newG = 230; newK = 3.2; break;
+            case 'high_ketones': newG = 230; newK = 3.5; break;
             default: break;
         }
 
