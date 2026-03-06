@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Home, BarChart3, Settings, Sparkles, LogOut, User, FileText } from 'lucide-react';
 
-const Sidebar = ({ isOpen, onClose, onViewChange, activeView }) => {
+const Sidebar = ({ isOpen, onClose, onViewChange, onLogout, activeView }) => {
     const menuItems = [
         { id: 'dashboard', label: 'لوحة التحكم', icon: Home },
         { id: 'profile', label: 'الملف الطبي', icon: User },
