@@ -61,11 +61,27 @@ const App = () => {
     const audioRef = useRef(null);
 
     // High-Quality MP3 Voice Manager
-    const playVoice = (filename) => {
+    const playVoice = (voiceId) => {
         if (audioRef.current) {
             audioRef.current.pause();
         }
-        // Paths assumed to be in /public/voice/
+
+        const voiceMap = {
+            'scanning': 'لَحْضة,  بنفحص سكرك الان',
+            'warning_low': 'انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم',
+            'danger_hypo': 'تحذير، بدا هبوطْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم',
+            'warning_ketones': 'صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ',
+            'danger_ketones': 'صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ',
+            'warning_high': 'انتبه، سكركْ بدا يرتفع  ، بس تأكد بِواسِطَة الدم',
+            'danger_hyper': 'تحذير، بدا ارتفاعْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم',
+            'pre_hypo': 'انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم',
+            'result_normal': 'ابشرك سكرك في المستوى الامن',
+            'calling_emergency': 'ماشفنا منك استجابه!! الآن بنتواصل مع اهلك',
+            'inject_success': 'بَشّركْ! ... تم الحقن بنجاح',
+            'refill_success': 'اموركْ طيبه !، تمتْ إعادةْ   '
+        };
+
+        const filename = voiceMap[voiceId] || voiceId;
         const audio = new Audio(`/voice/${filename}.mp3`);
         audioRef.current = audio;
         audio.play().catch(e => console.log("Audio play blocked or file missing:", e));
