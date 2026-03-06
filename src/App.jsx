@@ -286,12 +286,12 @@ const App = () => {
         }, 500);
 
         return () => clearInterval(interval);
-    }, [hasResult, targetGlucose, targetKetones, glucose, ketones, scenario, alertText, emergencyCall]);
+    }, [hasResult, targetGlucose, targetKetones, scenario, emergencyCall]);
 
     // --- SINGLE-TRIGGER SOS SEQUENCE (Strictly once per incident) ---
-    useEffect(() => {
-        const isHypoDanger = scenario === 'hypo_danger' && glucose < 50;
+    const isHypoDanger = scenario === 'hypo_danger' && glucose < 50;
 
+    useEffect(() => {
         if (isHypoDanger && !emergencyCall && sosSequenceRef.current === null) {
             setEmergencyReason("رصد هبوط حاد في السكر");
             sosSequenceRef.current = "SEQUENCE_LOCKED"; // Absolute lock
@@ -307,7 +307,7 @@ const App = () => {
             const step2_NoResponse = () => {
                 sosSequenceRef.current = setTimeout(() => {
                     playVoice('calling_emergency', step3_ShowUI);
-                    setAlertText("ماشفنا منك استجابه!! الآن بنتواصل مع اهلك.");
+                    setAlertText("ماشفنا منك استجابة!! الآن بنتواصل مع أهلك.");
                 }, 3000);
             };
 
@@ -318,7 +318,7 @@ const App = () => {
             step1_Danger();
         }
 
-        // Only allow a sequence reset if glucose goes back to normal for safety
+        // Reset if glucose goes back to normal
         if (!isHypoDanger && glucose >= 80) {
             if (sosSequenceRef.current) {
                 if (typeof sosSequenceRef.current === 'number') clearTimeout(sosSequenceRef.current);
