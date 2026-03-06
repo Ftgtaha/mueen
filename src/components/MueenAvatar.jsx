@@ -1,7 +1,19 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Volume2 } from 'lucide-react';
 
-const MueenAvatar = ({ scenario, alertText }) => {
+const MueenAvatar = ({ scenario, alertText, isSpeaking }) => {
+    const videoRef = useRef(null);
+
+    useEffect(() => {
+        if (videoRef.current) {
+            if (isSpeaking) {
+                videoRef.current.play().catch(e => console.log("Video play check:", e));
+            } else {
+                videoRef.current.pause();
+                videoRef.current.currentTime = 0;
+            }
+        }
+    }, [isSpeaking]);
     // Determine styling based on scenario
     let glowColor = 'glow-cyan';
     let pulseClass = '';
@@ -21,8 +33,8 @@ const MueenAvatar = ({ scenario, alertText }) => {
             {/* Avatar Video (Aseel) */}
             <div className={`relative w-36 h-36 rounded-full bg-[#1a0b3c] border-2 border-mueen-blue/20 ${glowColor} ${pulseClass} transition-all duration-500 overflow-hidden flex items-center justify-center`}>
                 <video
+                    ref={videoRef}
                     src="/فيديو_حركة_فم_طبيعية_بدون_تعابير.mp4"
-                    autoPlay
                     loop
                     muted
                     playsInline

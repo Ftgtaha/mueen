@@ -56,6 +56,7 @@ const App = () => {
     const [emergencyCall, setEmergencyCall] = useState(false);
     const [emergencyReason, setEmergencyReason] = useState("");
     const [alertText, setAlertText] = useState("مُعين جاهز لمراقبة صحتك.. ضعه على الجلد للبدء بفحـص دوري.");
+    const [isSpeaking, setIsSpeaking] = useState(false);
 
     const rescueTimerRef = useRef(null);
     const audioRef = useRef(null);
@@ -84,6 +85,11 @@ const App = () => {
         const filename = voiceMap[voiceId] || voiceId;
         const audio = new Audio(`/voice/${filename}.mp3`);
         audioRef.current = audio;
+
+        audio.onplay = () => setIsSpeaking(true);
+        audio.onended = () => setIsSpeaking(false);
+        audio.onpause = () => setIsSpeaking(false);
+
         audio.play().catch(e => console.log("Audio play blocked or file missing:", e));
     };
 
@@ -278,6 +284,14 @@ const App = () => {
                 if (alertText !== "ابشرك سكرك في المستوى الامن.") {
                     playVoice('result_normal');
                     nextAlert = "ابشرك سكرك في المستوى الامن.";
+                }
+            } else if (scenario === 'recovering') {
+                if (currentG >= 80) {
+                    if (alertText !== "ابشرك سكرك في المستوى الامن.") {
+                        setScenario('normal');
+                        playVoice('result_normal');
+                        nextAlert = "ابشرك سكرك في المستوى الامن.";
+                    }
                 }
             }
 
@@ -497,7 +511,7 @@ const App = () => {
                             </div>
                         </div>
 
-                        <MueenAvatar scenario={scenario} alertText={alertText} />
+                        <MueenAvatar scenario={scenario} alertText={alertText} isSpeaking={isSpeaking} />
 
                         <VitalsDisplay
                             glucose={glucose}
