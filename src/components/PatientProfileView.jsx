@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { User, Activity, Ruler, Weight, Syringe, ShieldCheck, AlertCircle, Info, ArrowLeft, Thermometer, Plus, Trash2, CheckCircle2, Zap } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Activity, Ruler, Weight, Syringe, ShieldCheck, Info, ArrowLeft, Thermometer, Plus, Trash2, Zap, CheckCircle2 } from 'lucide-react';
 
 const PatientProfileView = ({ patientData, onBack }) => {
     // State for Pump users
@@ -105,7 +105,7 @@ const PatientProfileView = ({ patientData, onBack }) => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3 mb-4">
                     {[
                         { label: 'العمر', value: `${patientData.age} سنة`, icon: Thermometer },
                         { label: 'الجنس', value: patientData.gender, icon: Activity },
@@ -118,6 +118,31 @@ const PatientProfileView = ({ patientData, onBack }) => {
                             <span className="text-md font-bold text-white leading-none">{item.value}</span>
                         </div>
                     ))}
+                </div>
+
+                {/* Emergency Contact Details */}
+                <div className="p-4 bg-red-500/5 rounded-2xl border border-red-500/10 text-right">
+                    <h4 className="text-[10px] text-red-400 font-bold uppercase mb-2">جهة اتصال الطوارئ</h4>
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-center text-xs">
+                            <span className="text-white font-bold">{patientData.emergencyRelationship || 'قريب'}</span>
+                            <span className="text-gray-500 text-[10px]">صلة القرابة:</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs">
+                            <span className="text-white font-bold">{patientData.emergencyName}</span>
+                            <span className="text-gray-500 text-[10px]">الاسم:</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs">
+                            <span className="text-white font-bold">{patientData.emergencyPhone}</span>
+                            <span className="text-gray-500 text-[10px]">الجوال:</span>
+                        </div>
+                        {patientData.emergencyDetails && (
+                            <div className="mt-2 pt-2 border-t border-red-500/5 text-[9px] text-gray-400 leading-relaxed">
+                                <span className="text-red-400 font-bold ml-1">ملاحظات:</span>
+                                {patientData.emergencyDetails}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 

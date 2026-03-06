@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Phone, ShieldCheck, ArrowLeft, HeartPulse, Activity, Ruler, Weight } from 'lucide-react';
+import { User, Phone, ShieldCheck, HeartPulse, Activity, Ruler, Weight } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
 const RegisterView = ({ onComplete }) => {
@@ -12,6 +12,8 @@ const RegisterView = ({ onComplete }) => {
     const [usePump, setUsePump] = useState(false);
     const [emergencyName, setEmergencyName] = useState('');
     const [emergencyPhone, setEmergencyPhone] = useState('');
+    const [emergencyRelationship, setEmergencyRelationship] = useState('');
+    const [emergencyDetails, setEmergencyDetails] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e) => {
@@ -29,6 +31,8 @@ const RegisterView = ({ onComplete }) => {
             usePump,
             emergencyName,
             emergencyPhone,
+            emergencyRelationship,
+            emergencyDetails,
             bloodType: 'O+'
         };
 
@@ -42,14 +46,15 @@ const RegisterView = ({ onComplete }) => {
                     glucose: 100,
                     ketones: 0.2,
                     alert_text: 'تم التسجيل بنجاح. ضعه على الجلد للبدء.',
-                    // --- Added for enhanced profile ---
                     patient_age: age,
                     patient_gender: gender,
                     patient_weight: weight,
                     patient_height: height,
                     use_pump: usePump,
                     emergency_name: emergencyName,
-                    emergency_phone: emergencyPhone
+                    emergency_phone: emergencyPhone,
+                    emergency_relationship: emergencyRelationship,
+                    emergency_details: emergencyDetails
                 });
 
             if (error) throw error;
@@ -197,6 +202,35 @@ const RegisterView = ({ onComplete }) => {
                                 className="bg-transparent border-none text-white text-xs focus:ring-0 flex-1 text-right outline-none"
                                 dir="rtl"
                                 required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="glass-panel p-1 border-white/5 bg-white/5">
+                        <div className="flex items-center px-4 py-2 gap-3">
+                            <ShieldCheck className="text-red-400 w-3 h-3" />
+                            <input
+                                type="text"
+                                placeholder="صلة القرابة (مثلاً: أب، أم)"
+                                value={emergencyRelationship}
+                                onChange={(e) => setEmergencyRelationship(e.target.value)}
+                                className="bg-transparent border-none text-white text-xs focus:ring-0 flex-1 text-right outline-none"
+                                dir="rtl"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="glass-panel p-1 border-white/5 bg-white/5">
+                        <div className="flex items-center px-4 py-2 gap-3">
+                            <Activity className="text-red-400 w-3 h-3" />
+                            <input
+                                type="text"
+                                placeholder="تفاصيل إضافية (اختياري)"
+                                value={emergencyDetails}
+                                onChange={(e) => setEmergencyDetails(e.target.value)}
+                                className="bg-transparent border-none text-white text-xs focus:ring-0 flex-1 text-right outline-none"
+                                dir="rtl"
                             />
                         </div>
                     </div>

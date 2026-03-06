@@ -373,8 +373,9 @@ const App = () => {
 
     const handleHardwareInject = async () => {
         if (glucagon > 0) {
+            const nextGlucagon = Math.max(0, glucagon - 1);
             playVoice('inject_success');
-            setGlucagon(prev => Math.max(0, prev - 1));
+            setGlucagon(nextGlucagon);
             setScenario('recovering');
             setEmergencyCall(false);
             if (sosSequenceRef.current) {
@@ -391,7 +392,7 @@ const App = () => {
                 glucose: 105,
                 ketones: 0.2,
                 alert_text: successMsg,
-                glucagon: glucagon - 1
+                glucagon: nextGlucagon
             }).eq('short_id', patientSessionId);
         }
     };
