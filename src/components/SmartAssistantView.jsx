@@ -57,7 +57,7 @@ const SmartAssistantView = ({ onBack }) => {
                 {messages.map((msg) => (
                     <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-start' : 'justify-end'} items-end gap-3 animate-in fade-in slide-in-from-bottom-2`}>
                         {msg.type === 'bot' && (
-                            <div className="w-32 h-32 flex-shrink-0 mb-1 rounded-full overflow-hidden border-2 border-mueen-cyan/30 shadow-[0_0_15px_rgba(34,211,238,0.2)] bg-[#3c1e70]">
+                            <div className="w-32 h-32 flex-shrink-0 mb-1 rounded-full overflow-hidden border-2 border-mueen-cyan/30 shadow-[0_0_15px_rgba(34,211,238,0.2)] bg-[#2d1b5e]">
                                 <img src="/معين 2.jpeg" alt="Asseel" className="w-full h-full object-contain" />
                             </div>
                         )}
