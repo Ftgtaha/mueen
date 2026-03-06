@@ -18,13 +18,16 @@ const MueenAvatar = ({ scenario, alertText }) => {
     return (
         <div className="glass-panel p-6 flex flex-col items-center justify-center relative min-h-[220px] mb-6">
 
-            {/* Avatar Image Placeholder */}
+            {/* Avatar Video (Aseel) */}
             <div className={`relative w-24 h-24 rounded-full bg-[#1a0b3c] border-2 border-mueen-blue/20 ${glowColor} ${pulseClass} transition-all duration-500 overflow-hidden flex items-center justify-center`}>
-                {/* INSERT AVATAR IMAGE/MODEL HERE */}
-                {/* Using Mueen text as placeholder for now based on user's logo request */}
-                <div className="font-bold text-center">
-                    <span className="text-xl bg-gradient-to-r from-mueen-cyan to-white bg-clip-text text-transparent">MUEEN</span>
-                </div>
+                <video
+                    src="/فيديو_حركة_فم_طبيعية_بدون_تعابير.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover scale-[1.35] translate-y-2"
+                />
             </div>
 
             {/* Speech Bubble / Alert Text */}
