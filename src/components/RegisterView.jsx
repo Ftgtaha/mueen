@@ -97,7 +97,7 @@ const RegisterView = ({ onComplete }) => {
                         </div>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                         <div className="glass-panel p-1 border-white/5 bg-white/5 flex-1">
                             <div className="flex items-center px-4 py-2 gap-3">
                                 <input
@@ -126,7 +126,7 @@ const RegisterView = ({ onComplete }) => {
                         </div>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                         <div className="glass-panel p-1 border-white/5 bg-white/5 flex-1">
                             <div className="flex items-center px-4 py-2 gap-3">
                                 <Weight className="text-mueen-cyan/50 w-3 h-3" />
