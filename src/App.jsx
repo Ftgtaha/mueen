@@ -41,7 +41,7 @@ const App = () => {
     // Vitals
     const [glucose, setGlucose] = useState(100);
     const [ketones, setKetones] = useState(0.2);
-    const [glucagon, setGlucagon] = useState(100);
+    const [glucagon, setGlucagon] = useState(2);
     const [battery, setBattery] = useState(98);
     const [chartData, setChartData] = useState([]);
 
@@ -136,6 +136,17 @@ const App = () => {
                     if (data.ketones) setTargetKetones(data.ketones);
                     if (data.alert_text) setAlertText(data.alert_text);
                     if (data.glucagon !== undefined) setGlucagon(data.glucagon);
+                })
+                .on('postgres_changes', {
+                    event: 'DELETE',
+                    schema: 'public',
+                    table: 'health_monitor',
+                    filter: `short_id=eq.${patientSessionId}`
+                }, () => {
+                    console.log("Account deleted, logging out...");
+                    localStorage.removeItem('mueen_session');
+                    setPatientSessionId(null);
+                    setIsRegistered(false);
                 })
                 .subscribe();
 
@@ -382,7 +393,7 @@ const App = () => {
                 if (typeof sosSequenceRef.current === 'number') clearTimeout(sosSequenceRef.current);
                 sosSequenceRef.current = null;
             }
-            const successMsg = "بَشّركْ! ... تم الحقن بنجاح.";
+            const successMsg = "بَشّركْ! ... تم الضخ بنجاح.";
             setAlertText(successMsg);
             setTargetGlucose(105);
             setTargetKetones(0.2);
@@ -399,7 +410,7 @@ const App = () => {
 
     const handleRefill = () => {
         playVoice('refill_success');
-        setGlucagon(100);
+        setGlucagon(2);
         setAlertText("اموركْ طيبه !، تمتْ إعادةْ التعبئة.");
     };
 
