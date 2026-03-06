@@ -341,12 +341,13 @@ const App = () => {
 
             const step2_NoResponse = () => {
                 sosSequenceRef.current = setTimeout(() => {
-                    playVoice('calling_emergency', step3_ShowUI);
                     setAlertText("ماشفنا منك استجابة!! الآن بنتواصل مع أهلك.");
+                    playVoice('calling_emergency', step3_ShowUI);
                 }, 3000);
             };
 
             const step1_Danger = () => {
+                // Force an alert update if it's already showing the same text but we need to re-trigger voice through SOS logic
                 playVoice(voiceId, step2_NoResponse);
             };
 
