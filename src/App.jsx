@@ -84,7 +84,10 @@ const App = () => {
         const filename = voiceMap[voiceId] || voiceId;
 
         // Deduplication check: Don't repeat the exact same voice text in a row
-        if (playedAlertsRef.current.has(filename)) return;
+        if (playedAlertsRef.current.has(filename)) {
+            if (onFinish) onFinish(); // CRITICAL: Call callback even if voice is skipped to prevent SOS chain break
+            return;
+        }
         playedAlertsRef.current.add(filename);
 
         const audio = new Audio(`/voice/${filename}.mp3`);
@@ -309,7 +312,7 @@ const App = () => {
     // --- SINGLE-TRIGGER SOS SEQUENCE (Strictly once per incident) ---
     const isHypoDanger = scenario === 'hypo_danger' && glucose < 50;
     const isHyperDanger = scenario === 'hyper' && glucose >= 250;
-    const isKetoneDanger = scenario === 'high_ketones' && ketones >= 3.5;
+    const isKetoneDanger = scenario === 'high_ketones' && ketones >= 3.4;
     const isCriticalCondition = isHypoDanger || isHyperDanger || isKetoneDanger;
 
     useEffect(() => {
