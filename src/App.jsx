@@ -122,31 +122,35 @@ const App = () => {
             channel = supabase
                 .channel('health_sync')
                 .on('postgres_changes', {
-                    event: 'UPDATE',
+                    event: '*',
                     schema: 'public',
-                    table: 'health_monitor',
-                    filter: `short_id=eq.${patientSessionId}`
+                    table: 'health_monitor'
                 }, (payload) => {
-                    const data = payload.new;
-                    if (data.scenario && data.scenario !== scenario) {
-                        setScenario(data.scenario);
-                        setHasResult(true);
+                    const oldData = payload.old;
+                    const newData = payload.new;
+
+                    // Check if this event concerns our current patient
+                    const isTarget = (newData && newData.short_id === patientSessionId) ||
+                        (oldData && oldData.short_id === patientSessionId);
+
+                    if (!isTarget) return;
+
+                    if (payload.eventType === 'DELETE') {
+                        console.log("Account deleted remotely, logging out...");
+                        localStorage.removeItem('mueen_session');
+                        setPatientSessionId(null);
+                        setIsRegistered(false);
+                    } else if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+                        const data = newData;
+                        if (data.scenario && data.scenario !== scenario) {
+                            setScenario(data.scenario);
+                            setHasResult(true);
+                        }
+                        if (data.glucose) setTargetGlucose(data.glucose);
+                        if (data.ketones) setTargetKetones(data.ketones);
+                        if (data.alert_text) setAlertText(data.alert_text);
+                        if (data.glucagon !== undefined) setGlucagon(data.glucagon);
                     }
-                    if (data.glucose) setTargetGlucose(data.glucose);
-                    if (data.ketones) setTargetKetones(data.ketones);
-                    if (data.alert_text) setAlertText(data.alert_text);
-                    if (data.glucagon !== undefined) setGlucagon(data.glucagon);
-                })
-                .on('postgres_changes', {
-                    event: 'DELETE',
-                    schema: 'public',
-                    table: 'health_monitor',
-                    filter: `short_id=eq.${patientSessionId}`
-                }, () => {
-                    console.log("Account deleted, logging out...");
-                    localStorage.removeItem('mueen_session');
-                    setPatientSessionId(null);
-                    setIsRegistered(false);
                 })
                 .subscribe();
 
