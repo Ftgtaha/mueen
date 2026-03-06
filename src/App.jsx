@@ -179,7 +179,7 @@ const App = () => {
         }
     }, [isScanning]);
 
-    // MAIN SIMULATION LOOP (500ms)
+    // --- MAIN SIMULATION LOOP (Runs every 500ms) ---
     useEffect(() => {
         if (!hasResult) return;
 
@@ -214,7 +214,7 @@ const App = () => {
 
             let nextAlert = alertText;
 
-            // --- EMERGENCY LOGIC (Vitals Monitoring Only) ---
+            // --- VITALS CONDITION MONITORING ---
             if (scenario === 'hypo_danger') {
                 if (currentG < 80 && currentG >= 50) {
                     if (alertText !== "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.") {
@@ -226,7 +226,7 @@ const App = () => {
                     if (alertText !== dangerMsg) {
                         nextAlert = dangerMsg;
                     }
-                    // SOS sequence is handled by a dedicated stable useEffect below
+                    // Sequential SOS escalation handled by the dedicated useEffect below
                 }
             } else if (scenario === 'high_ketones') {
                 if (currentK >= 1.5 && currentK < 2.5) {
@@ -239,14 +239,6 @@ const App = () => {
                         playVoice('danger_ketones');
                         nextAlert = "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.";
                     }
-                    if (!emergencyCall && !rescueTimerRef.current) {
-                        setEmergencyReason("رصد ارتفاع حاد كيتوني");
-                        rescueTimerRef.current = setTimeout(() => {
-                            playVoice('calling_emergency');
-                            setAlertText("ماشفنا منك استجابه!! الآن بنتواصل مع اهلك.");
-                            setTimeout(() => setEmergencyCall(true), 4000);
-                        }, 8000);
-                    }
                 }
             } else if (scenario === 'hyper') {
                 if (currentG >= 180 && currentG < 250) {
@@ -258,14 +250,6 @@ const App = () => {
                     if (alertText !== "تحذير، بدا ارتفاعْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.") {
                         playVoice('danger_hyper');
                         nextAlert = "تحذير، بدا ارتفاعْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.";
-                    }
-                    if (!emergencyCall && !rescueTimerRef.current) {
-                        setEmergencyReason("رصد ارتفاع حاد جداً");
-                        rescueTimerRef.current = setTimeout(() => {
-                            playVoice('calling_emergency');
-                            setAlertText("ماشفنا منك استجابه!! الآن بنتواصل مع اهلك.");
-                            setTimeout(() => setEmergencyCall(true), 4000);
-                        }, 8000);
                     }
                 }
             } else if (scenario === 'pre_hypo') {
@@ -304,23 +288,33 @@ const App = () => {
         return () => clearInterval(interval);
     }, [hasResult, targetGlucose, targetKetones, glucose, ketones, scenario, alertText, emergencyCall]);
 
-    // DEDICATED SOS SEQUENCE EFFECT (Stable & Non-Looping)
+    // --- DEDICATED STABLE SOS SEQUENCE EFFECT ---
     useEffect(() => {
-        if (scenario === 'hypo_danger' && glucose < 50 && !emergencyCall && sosSequenceRef.current === null) {
-            setEmergencyReason("رصد هبوط حاد في السكر");
-            sosSequenceRef.current = "ACTIVE";
+        const isHypoDanger = scenario === 'hypo_danger' && glucose < 50;
 
-            // Timing Chain: Danger 1 -> 2s Gap -> Danger 2 -> 3s Wait -> No Response -> 2s Delay -> UI
-            const step4_ShowUI = () => {
+        if (isHypoDanger && !emergencyCall && sosSequenceRef.current === null) {
+            setEmergencyReason("رصد هبوط حاد في السكر");
+            sosSequenceRef.current = "ACTIVE_SEQUENCE";
+
+            // exact sequence timing requested:
+            // 1. Danger 1
+            // 2. Wait 2s
+            // 3. Danger 2
+            // 4. Wait 3s
+            // 5. Calling Emergency Voice
+            // 6. Wait 2s
+            // 7. Show SOS UI
+
+            const step4_LaunchUI = () => {
                 sosSequenceRef.current = setTimeout(() => {
                     setEmergencyCall(true);
-                    sosSequenceRef.current = "SOS_UI_OPEN";
+                    sosSequenceRef.current = "SOS_UI_PRESENT";
                 }, 2000);
             };
 
             const step3_NoResponse = () => {
                 sosSequenceRef.current = setTimeout(() => {
-                    playVoice('calling_emergency', step4_ShowUI);
+                    playVoice('calling_emergency', step4_LaunchUI);
                     setAlertText("ماشفنا منك استجابه!! الآن بنتواصل مع اهلك.");
                 }, 3000);
             };
@@ -338,9 +332,10 @@ const App = () => {
             step1_Start();
         }
 
-        // Cleanup: Reset lock if scenario is resolved manually or glucose recovers
-        if (scenario !== 'hypo_danger' || glucose >= 80) {
-            if (sosSequenceRef.current && typeof sosSequenceRef.current !== 'number') {
+        // Cleanup: Reset lock if the patient is no longer in critical danger
+        if (!isHypoDanger && scenario !== 'hypo_danger' && glucose >= 80) {
+            if (sosSequenceRef.current) {
+                if (typeof sosSequenceRef.current === 'number') clearTimeout(sosSequenceRef.current);
                 sosSequenceRef.current = null;
             }
         }
@@ -353,10 +348,6 @@ const App = () => {
         setEmergencyCall(false);
         setEmergencyReason("");
 
-        if (rescueTimerRef.current) {
-            if (typeof rescueTimerRef.current === 'number') clearTimeout(rescueTimerRef.current);
-            rescueTimerRef.current = null;
-        }
         if (sosSequenceRef.current) {
             if (typeof sosSequenceRef.current === 'number') clearTimeout(sosSequenceRef.current);
             sosSequenceRef.current = null;
@@ -393,10 +384,6 @@ const App = () => {
             setGlucagon(prev => Math.max(0, prev - 1));
             setScenario('recovering');
             setEmergencyCall(false);
-            if (rescueTimerRef.current) {
-                if (typeof rescueTimerRef.current === 'number') clearTimeout(rescueTimerRef.current);
-                rescueTimerRef.current = null;
-            }
             if (sosSequenceRef.current) {
                 if (typeof sosSequenceRef.current === 'number') clearTimeout(sosSequenceRef.current);
                 sosSequenceRef.current = null;
@@ -560,10 +547,6 @@ const App = () => {
                     setEmergencyCall(false);
                     setScenario('normal');
                     setTargetGlucose(110);
-                    if (rescueTimerRef.current) {
-                        if (typeof rescueTimerRef.current === 'number') clearTimeout(rescueTimerRef.current);
-                        rescueTimerRef.current = null;
-                    }
                     if (sosSequenceRef.current) {
                         if (typeof sosSequenceRef.current === 'number') clearTimeout(sosSequenceRef.current);
                         sosSequenceRef.current = null;
