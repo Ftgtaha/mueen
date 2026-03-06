@@ -214,12 +214,12 @@ const App = () => {
 
             // --- EMERGENCY LOGIC (Saudi Dialect UI) ---
             if (scenario === 'hypo_danger') {
-                if (currentG <= 70 && currentG > 55) {
+                if (currentG < 80 && currentG >= 70) {
                     if (alertText !== "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.") {
                         playVoice('warning_low');
                         nextAlert = "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.";
                     }
-                } else if (currentG <= 55) {
+                } else if (currentG < 70) {
                     if (alertText !== "تحذير، بدا هبوطْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.") {
                         playVoice('danger_hypo');
                         nextAlert = "تحذير، بدا هبوطْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.";
