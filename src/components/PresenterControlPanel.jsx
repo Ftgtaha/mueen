@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Syringe, RefreshCcw, Hand, AlertCircle, Activity, Flame, ShieldAlert, ArrowUpCircle } from 'lucide-react';
 
-const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, currentScenario }) => {
+const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, currentScenario, glucagon }) => {
 
     const handleKeyDown = (e) => {
         if (e.key === '1') onStartEmergency('normal');
@@ -59,7 +59,7 @@ const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, c
                         className="col-span-4 py-3 px-4 rounded-xl bg-mueen-blue/20 border border-mueen-blue/50 text-mueen-cyan font-bold flex items-center justify-center space-x-2 space-x-reverse hover:bg-mueen-blue/30 transition-all active:scale-95 shadow-[0_0_20px_rgba(41,121,255,0.2)]"
                     >
                         <Syringe className="w-5 h-5" />
-                        <span>محاكاة ضغطة زر الحقن [2]</span>
+                        <span>محاكاة ضغطة زر الحقن [{glucagon}]</span>
                     </button>
 
                     <button

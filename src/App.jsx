@@ -596,6 +596,7 @@ const App = () => {
                         onStartEmergency={startRescueScan}
                         onHardwareInject={handleHardwareInject}
                         onRefill={handleRefill}
+                        glucagon={glucagon}
                     />
                 )
             }
