@@ -60,7 +60,6 @@ const App = () => {
 
     const rescueTimerRef = useRef(null);
     const audioRef = useRef(null);
-    const voicePlayed50Ref = useRef(false);
 
     // High-Quality MP3 Voice Manager
     const playVoice = (voiceId, onFinish) => {
@@ -224,53 +223,34 @@ const App = () => {
 
             // --- EMERGENCY LOGIC (Saudi Dialect UI) ---
             if (scenario === 'hypo_danger') {
-                if (currentG < 80 && currentG >= 70) {
+                if (currentG < 80 && currentG >= 50) {
                     if (alertText !== "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.") {
                         playVoice('warning_low');
                         nextAlert = "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.";
                     }
-                } else if (currentG < 70) {
+                } else if (currentG < 50) {
                     const dangerMsg = "تحذير، بدا هبوطْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.";
                     if (alertText !== dangerMsg) {
                         nextAlert = dangerMsg;
-                        // Start the sequence if not already in one
-                        if (!rescueTimerRef.current) {
-                            setEmergencyReason("رصد هبوط حاد في السكر");
-
-                            // 1. Play first danger voice (only if <= 50)
-                            const startSOS = () => {
-                                playVoice('calling_emergency', () => {
-                                    setAlertText("ماشفنا منك استجابه!! الآن بنتواصل مع اهلك.");
-                                    setTimeout(() => setEmergencyCall(true), 1000);
-                                });
-                            };
-
-                            const playSecondWarning = () => {
-                                // Wait 3 seconds of silence between warnings
-                                rescueTimerRef.current = setTimeout(() => {
-                                    playVoice('danger_hypo', startSOS);
-                                }, 3000);
-                            };
-
-                            if (currentG <= 50) {
-                                playVoice('danger_hypo', playSecondWarning);
-                                voicePlayed50Ref.current = true;
-                            } else {
-                                // If between 50-70, we just wait 8 seconds before calling (legacy behavior)
-                                rescueTimerRef.current = setTimeout(startSOS, 8000);
-                            }
-                        }
                     }
 
-                    if (currentG <= 50 && !voicePlayed50Ref.current && !rescueTimerRef.current) {
-                        // This handles the case where it drops to 50 later
-                        playVoice('danger_hypo', () => {
-                            voicePlayed50Ref.current = true;
-                        });
-                    }
+                    if (!rescueTimerRef.current) {
+                        setEmergencyReason("رصد هبوط حاد في السكر");
 
-                    if (currentG > 50) {
-                        voicePlayed50Ref.current = false;
+                        const startSOS = () => {
+                            playVoice('calling_emergency', () => {
+                                setAlertText("ماشفنا منك استجابه!! الآن بنتواصل مع اهلك.");
+                                setTimeout(() => setEmergencyCall(true), 1000);
+                            });
+                        };
+
+                        const playSecondWarning = () => {
+                            rescueTimerRef.current = setTimeout(() => {
+                                playVoice('danger_hypo', startSOS);
+                            }, 3000);
+                        };
+
+                        playVoice('danger_hypo', playSecondWarning);
                     }
                 }
             } else if (scenario === 'high_ketones') {
