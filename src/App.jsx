@@ -309,7 +309,7 @@ const App = () => {
     // --- SINGLE-TRIGGER SOS SEQUENCE (Strictly once per incident) ---
     const isHypoDanger = scenario === 'hypo_danger' && glucose < 50;
     const isHyperDanger = scenario === 'hyper' && glucose >= 250;
-    const isKetoneDanger = scenario === 'high_ketones' && ketones >= 3.0;
+    const isKetoneDanger = scenario === 'high_ketones' && ketones >= 3.5;
     const isCriticalCondition = isHypoDanger || isHyperDanger || isKetoneDanger;
 
     useEffect(() => {
