@@ -45,9 +45,6 @@ const SmartAssistantView = ({ onBack }) => {
                     <ChevronLeft className="w-6 h-6 rotate-180" />
                 </button>
                 <div className="flex items-center mr-2">
-                    <div className="w-10 h-10 rounded-full bg-mueen-cyan/10 flex items-center justify-center ml-3 overflow-hidden border border-mueen-cyan/30">
-                        <img src="/معين 2.jpeg" alt="Asseel" className="w-full h-full object-cover" />
-                    </div>
                     <div>
                         <h1 className="text-lg font-bold text-white leading-none">أصـيل</h1>
                         <p className="text-[10px] text-mueen-cyan font-bold uppercase tracking-widest mt-1">Asseel AI Assistant</p>
@@ -58,8 +55,13 @@ const SmartAssistantView = ({ onBack }) => {
             {/* Chat Area */}
             <div className="flex-1 overflow-y-auto space-y-4 p-4 glass-panel mb-4 no-scrollbar" style={{ backgroundColor: 'rgba(26, 11, 60, 0.3)', border: '1px solid rgba(41, 121, 255, 0.1)' }}>
                 {messages.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-start' : 'justify-end'} animate-in fade-in slide-in-from-bottom-2`}>
-                        <div className={`max-w-[80%] p-3 rounded-2xl text-xs leading-relaxed ${msg.type === 'user'
+                    <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-start' : 'justify-end'} items-end gap-3 animate-in fade-in slide-in-from-bottom-2`}>
+                        {msg.type === 'bot' && (
+                            <div className="w-16 h-16 flex-shrink-0 mb-1 overflow-hidden">
+                                <img src="/معين 2.jpeg" alt="Asseel" className="w-full h-full object-contain" />
+                            </div>
+                        )}
+                        <div className={`max-w-[70%] p-4 rounded-2xl text-xs leading-relaxed ${msg.type === 'user'
                             ? 'bg-mueen-cyan text-mueen-dark font-bold rounded-tr-none'
                             : 'bg-white/10 text-gray-300 rounded-tl-none border border-white/5'
                             }`}>
