@@ -209,75 +209,75 @@ const App = () => {
             // --- EMERGENCY LOGIC (Saudi Dialect UI) ---
             if (scenario === 'hypo_danger') {
                 if (currentG <= 70 && currentG > 55) {
-                    if (alertText !== "تنبيه.. السكر بدأ ينزل عن الطبيعي، تابع حالتك.") {
+                    if (alertText !== "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.") {
                         playVoice('warning_low');
-                        nextAlert = "تنبيه.. السكر بدأ ينزل عن الطبيعي، تابع حالتك.";
+                        nextAlert = "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.";
                     }
                 } else if (currentG <= 55) {
-                    if (alertText !== "خطر! رصدنا هبوط حاد. تكفى احقن الحين قبل ما تدوخ.") {
+                    if (alertText !== "تحذير، بدا هبوطْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.") {
                         playVoice('danger_hypo');
-                        nextAlert = "خطر! رصدنا هبوط حاد. تكفى احقن الحين قبل ما تدوخ.";
+                        nextAlert = "تحذير، بدا هبوطْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.";
                     }
                     if (!emergencyCall && !rescueTimerRef.current) {
                         setEmergencyReason("رصد هبوط حاد في السكر");
                         rescueTimerRef.current = setTimeout(() => {
                             playVoice('calling_emergency');
-                            setAlertText("ما فيه رد.. جاري الاتصال بالطوارئ وأهلك الحين.");
+                            setAlertText("ماشفنا منك استجابه!! الآن بنتواصل مع اهلك.");
                             setTimeout(() => setEmergencyCall(true), 4000);
                         }, 8000);
                     }
                 }
             } else if (scenario === 'high_ketones') {
                 if (currentK >= 1.5 && currentK < 2.5) {
-                    if (alertText !== "تحذير.. الكيتونات مرتفعة شوي. يرجى مراقبة الحالة.") {
+                    if (alertText !== "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.") {
                         playVoice('warning_ketones');
-                        nextAlert = "تحذير.. الكيتونات مرتفعة شوي. يرجى مراقبة الحالة.";
+                        nextAlert = "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.";
                     }
                 } else if (currentK >= 2.5) {
-                    if (alertText !== "خطر! الكيتونات مرتفعة مرة. احتمال حموضة بالدم، لازم طبيب فوراً.") {
+                    if (alertText !== "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.") {
                         playVoice('danger_ketones');
-                        nextAlert = "خطر! الكيتونات مرتفعة مرة. احتمال حموضة بالدم، لازم طبيب فوراً.";
+                        nextAlert = "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.";
                     }
                     if (!emergencyCall && !rescueTimerRef.current) {
                         setEmergencyReason("رصد ارتفاع حاد كيتوني");
                         rescueTimerRef.current = setTimeout(() => {
                             playVoice('calling_emergency');
-                            setAlertText("ما فيه رد.. جاري الاتصال بالطوارئ لتفادي غيبوبة الكيتونات...");
+                            setAlertText("ماشفنا منك استجابه!! الآن بنتواصل مع اهلك.");
                             setTimeout(() => setEmergencyCall(true), 4000);
                         }, 8000);
                     }
                 }
             } else if (scenario === 'hyper') {
                 if (currentG >= 180 && currentG < 250) {
-                    if (alertText !== "تنبيه.. السكر مرتفع. تأكد عبر فحص الدم التقليدي.") {
+                    if (alertText !== "انتبه، سكركْ بدا يرتفع  ، بس تأكد بِواسِطَة الدم.") {
                         playVoice('warning_high');
-                        nextAlert = "تنبيه.. السكر مرتفع. تأكد عبر فحص الدم التقليدي.";
+                        nextAlert = "انتبه، سكركْ بدا يرتفع  ، بس تأكد بِواسِطَة الدم.";
                     }
                 } else if (currentG >= 250) {
-                    if (alertText !== "انتبه! السكر عندك مرتفع بالحيل. خطر غيبوبة، لازم مساعدة طبية.") {
+                    if (alertText !== "تحذير، بدا ارتفاعْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.") {
                         playVoice('danger_hyper');
-                        nextAlert = "انتبه! السكر عندك مرتفع بالحيل. خطر غيبوبة، لازم مساعدة طبية.";
+                        nextAlert = "تحذير، بدا ارتفاعْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.";
                     }
                     if (!emergencyCall && !rescueTimerRef.current) {
                         setEmergencyReason("رصد ارتفاع حاد جداً");
                         rescueTimerRef.current = setTimeout(() => {
                             playVoice('calling_emergency');
-                            setAlertText("ما فيه رد.. جاري إبلاغ جهات الاتصال والأهل الحين...");
+                            setAlertText("ماشفنا منك استجابه!! الآن بنتواصل مع اهلك.");
                             setTimeout(() => setEmergencyCall(true), 4000);
                         }, 8000);
                     }
                 }
             } else if (scenario === 'pre_hypo') {
                 if (currentG <= 80 && currentG > 70) {
-                    if (alertText !== "انتبه.. السكر مائل للهبوط، خذ لك شيء بسيط يرفعه.") {
+                    if (alertText !== "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.") {
                         playVoice('pre_hypo');
-                        nextAlert = "انتبه.. السكر مائل للهبوط، خذ لك شيء بسيط يرفعه.";
+                        nextAlert = "انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم.";
                     }
                 }
             } else if (scenario === 'normal') {
-                if (alertText !== "أبشرك.. السكر في النطاق الطبيعي ووضعك تمام.") {
+                if (alertText !== "ابشرك سكرك في المستوى الامن.") {
                     playVoice('result_normal');
-                    nextAlert = "أبشرك.. السكر في النطاق الطبيعي ووضعك تمام.";
+                    nextAlert = "ابشرك سكرك في المستوى الامن.";
                 }
             }
 
@@ -366,7 +366,7 @@ const App = () => {
             setEmergencyCall(false);
             if (rescueTimerRef.current) clearTimeout(rescueTimerRef.current);
             rescueTimerRef.current = null;
-            const successMsg = "تم الحقن بنجاح.. أبشر بالعافية، جاري مراقبة حالتك.";
+            const successMsg = "بَشّركْ! ... تم الحقن بنجاح.";
             setAlertText(successMsg);
             setTargetGlucose(105);
             setTargetKetones(0.2);
@@ -387,7 +387,7 @@ const App = () => {
     const handleRefill = () => {
         playVoice('refill_success');
         setGlucagon(1.0);
-        setAlertText("تمت التعبئة بنجاح.. كبسولة القلوكاجون جاهزة للاستخدام.");
+        setAlertText("اموركْ طيبه !، تمتْ إعادةْ التعبئة.");
     };
 
     const handleManualPairing = (data) => {
