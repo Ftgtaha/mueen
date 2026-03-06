@@ -206,7 +206,7 @@ const App = () => {
 
     // --- REACTIVE ALERT ENGINE (Listen to vitals & scenario changes) ---
     useEffect(() => {
-        if (!hasResult || emergencyCall) return;
+        if (!hasResult || emergencyCall || sosSequenceRef.current) return;
 
         let nextAlert = alertText;
 
@@ -230,7 +230,6 @@ const App = () => {
                 }
             } else if (ketones >= 2.5) {
                 if (alertText !== "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.") {
-                    playVoice('danger_ketones');
                     nextAlert = "صحتك تْهمّنا! عندكْ مؤشرات الحموضةْ مرتفعه! ! ، اتجه لِأقرب طوارئ.";
                 }
             }
@@ -242,7 +241,6 @@ const App = () => {
                 }
             } else if (glucose >= 250) {
                 if (alertText !== "تحذير، بدا ارتفاعْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.") {
-                    playVoice('danger_hyper');
                     nextAlert = "تحذير، بدا ارتفاعْ حادْ في سكركْ ، بس تأكد بِواسِطَة الدم.";
                 }
             }
