@@ -149,7 +149,7 @@ const App = () => {
                         if (data.glucose) setTargetGlucose(data.glucose);
                         if (data.ketones) setTargetKetones(data.ketones);
                         if (data.alert_text) setAlertText(data.alert_text);
-                        if (data.glucagon !== undefined) setGlucagon(data.glucagon);
+                        if (data.glucagon !== undefined) setGlucagon(data.glucagon > 2 ? 2 : data.glucagon);
                     }
                 })
                 .subscribe();
@@ -397,7 +397,12 @@ const App = () => {
                 if (typeof sosSequenceRef.current === 'number') clearTimeout(sosSequenceRef.current);
                 sosSequenceRef.current = null;
             }
-            const successMsg = "بَشّركْ! ... تم الضخ بنجاح.";
+
+            let successMsg = "بَشّركْ! ... تم الضخ بنجاح.";
+            if (nextGlucagon === 0) {
+                successMsg = "تم الضخ بنجاح! نذكرك أن الكمية صفر، وتحتاج تعبئة.";
+            }
+
             setAlertText(successMsg);
             setTargetGlucose(105);
             setTargetKetones(0.2);
@@ -409,6 +414,9 @@ const App = () => {
                 alert_text: successMsg,
                 glucagon: nextGlucagon
             }).eq('short_id', patientSessionId);
+        } else {
+            setAlertText("عذراً، المحقنة فارغة! يرجى إعادة التعبئة قبل الضخ.");
+            playVoice('warning_refill'); // Assuming we might add this or handle it gracefully
         }
     };
 

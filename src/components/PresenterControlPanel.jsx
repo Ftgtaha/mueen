@@ -7,7 +7,7 @@ const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, c
         if (e.key === '1') onStartEmergency('normal');
         if (e.key === '2') onStartEmergency('pre_hypo');
         if (e.key === '3') onStartEmergency('hypo_danger');
-        if (e.key === '4') onHardwareInject();
+        if (e.key === '2') onHardwareInject();
         if (e.key === '5') onRefill();
         if (e.key === '6') onStartEmergency('hyper');
         if (e.key === '7') onStartEmergency('high_ketones');
@@ -59,7 +59,7 @@ const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, c
                         className="col-span-4 py-3 px-4 rounded-xl bg-mueen-blue/20 border border-mueen-blue/50 text-mueen-cyan font-bold flex items-center justify-center space-x-2 space-x-reverse hover:bg-mueen-blue/30 transition-all active:scale-95 shadow-[0_0_20px_rgba(41,121,255,0.2)]"
                     >
                         <Syringe className="w-5 h-5" />
-                        <span>محاكاة ضغطة زر الحقن [4]</span>
+                        <span>محاكاة ضغطة زر الحقن [2]</span>
                     </button>
 
                     <button
@@ -71,7 +71,7 @@ const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, c
                     </button>
                 </div>
 
-                <p className="text-center text-[9px] text-gray-600 italic">Keybinds: 1, 2, 3, 6, 7 (Scenarios) | 4, 5 (Hardware)</p>
+                <p className="text-center text-[9px] text-gray-600 italic">Keybinds: 1, 2, 3, 6, 7 (Scenarios) | 2, 5 (Hardware)</p>
             </div>
         </div>
     );
