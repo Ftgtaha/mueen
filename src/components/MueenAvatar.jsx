@@ -19,14 +19,14 @@ const MueenAvatar = ({ scenario, alertText }) => {
         <div className="glass-panel p-6 flex flex-col items-center justify-center relative min-h-[220px] mb-6">
 
             {/* Avatar Video (Aseel) */}
-            <div className={`relative w-24 h-24 rounded-full bg-[#1a0b3c] border-2 border-mueen-blue/20 ${glowColor} ${pulseClass} transition-all duration-500 overflow-hidden flex items-center justify-center`}>
+            <div className={`relative w-36 h-36 rounded-full bg-[#1a0b3c] border-2 border-mueen-blue/20 ${glowColor} ${pulseClass} transition-all duration-500 overflow-hidden flex items-center justify-center`}>
                 <video
                     src="/فيديو_حركة_فم_طبيعية_بدون_تعابير.mp4"
                     autoPlay
                     loop
                     muted
                     playsInline
-                    className="w-full h-full object-cover scale-[1.35] translate-y-2"
+                    className="w-full h-full object-cover"
                 />
             </div>
 
