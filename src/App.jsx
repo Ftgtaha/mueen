@@ -282,10 +282,27 @@ const App = () => {
 
     // --- SINGLE-TRIGGER SOS SEQUENCE (Strictly once per incident) ---
     const isHypoDanger = scenario === 'hypo_danger' && glucose < 50;
+    const isHyperDanger = scenario === 'hyper' && glucose >= 250;
+    const isKetoneDanger = scenario === 'high_ketones' && ketones >= 2.5;
+    const isCriticalCondition = isHypoDanger || isHyperDanger || isKetoneDanger;
 
     useEffect(() => {
-        if (isHypoDanger && !emergencyCall && sosSequenceRef.current === null) {
-            setEmergencyReason("رصد هبوط حاد في السكر");
+        if (isCriticalCondition && !emergencyCall && sosSequenceRef.current === null) {
+            let reason = "";
+            let voiceId = "";
+
+            if (isHypoDanger) {
+                reason = "رصد هبوط حاد في السكر";
+                voiceId = "danger_hypo";
+            } else if (isHyperDanger) {
+                reason = "رصد ارتفاع حاد جداً";
+                voiceId = "danger_hyper";
+            } else if (isKetoneDanger) {
+                reason = "رصد ارتفاع حاد كيتوني";
+                voiceId = "danger_ketones";
+            }
+
+            setEmergencyReason(reason);
             sosSequenceRef.current = "SEQUENCE_LOCKED"; // Absolute lock
 
             // Timing Chain: Warning (1x) -> 3s Gap -> Calling Voice -> 2s Gap -> UI
@@ -304,20 +321,20 @@ const App = () => {
             };
 
             const step1_Danger = () => {
-                playVoice('danger_hypo', step2_NoResponse);
+                playVoice(voiceId, step2_NoResponse);
             };
 
             step1_Danger();
         }
 
-        // Reset if glucose goes back to normal
-        if (!isHypoDanger && glucose >= 80) {
+        // Reset if condition is resolved (glucose back up or ketones down)
+        if (!isCriticalCondition && glucose >= 80 && ketones < 1.0) {
             if (sosSequenceRef.current) {
                 if (typeof sosSequenceRef.current === 'number') clearTimeout(sosSequenceRef.current);
                 sosSequenceRef.current = null;
             }
         }
-    }, [isHypoDanger, emergencyCall]);
+    }, [isCriticalCondition, emergencyCall]);
 
     const startRescueScan = async (targetScenario) => {
         setHasResult(true);
