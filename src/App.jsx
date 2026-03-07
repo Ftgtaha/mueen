@@ -219,6 +219,9 @@ const App = () => {
 
         const interval = setInterval(() => {
             let stepSizeG = 2;
+            if (scenario === 'paused') {
+                return; // Freeze the simulation entirely
+            }
             if (isPumping) {
                 stepSizeG = 6;
             } else if (scenario === 'pre_hypo' || scenario === 'normal' || scenario === 'recovering' || scenario === 'recovery') {
@@ -446,7 +449,7 @@ const App = () => {
     const handleStopPumping = async (finalGlucagon = glucagon) => {
         setIsPumping(false);
         playVoice('inject_success');
-        setScenario('recovering');
+        setScenario('paused');
         setEmergencyCall(false);
         if (sosSequenceRef.current) {
             if (typeof sosSequenceRef.current === 'number') clearTimeout(sosSequenceRef.current);
@@ -461,7 +464,7 @@ const App = () => {
         setAlertText(successMsg);
 
         await supabase.from('health_monitor').update({
-            scenario: 'recovering',
+            scenario: 'paused',
             alert_text: successMsg,
             glucagon: finalGlucagon
         }).eq('short_id', patientSessionId);
