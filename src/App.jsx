@@ -219,7 +219,9 @@ const App = () => {
 
         const interval = setInterval(() => {
             let stepSizeG = 2;
-            if (scenario === 'pre_hypo' || scenario === 'normal' || scenario === 'recovering' || scenario === 'recovery') {
+            if (isPumping) {
+                stepSizeG = 6;
+            } else if (scenario === 'pre_hypo' || scenario === 'normal' || scenario === 'recovering' || scenario === 'recovery') {
                 stepSizeG = 1;
             } else if (scenario === 'hyper') {
                 // No change to stepSizeG, remains 2
@@ -239,7 +241,7 @@ const App = () => {
         }, 500);
 
         return () => clearInterval(interval);
-    }, [hasResult, targetGlucose, targetKetones, scenario]);
+    }, [hasResult, targetGlucose, targetKetones, scenario, isPumping]);
 
     // --- REACTIVE ALERT ENGINE (Listen to vitals & scenario changes) ---
     useEffect(() => {
@@ -429,6 +431,7 @@ const App = () => {
                     const nextVal = Math.max(0, prev - 0.1);
                     return parseFloat(nextVal.toFixed(1));
                 });
+                setTargetGlucose(prev => prev + 12);
             }, 1000);
         }
         return () => clearInterval(interval);
@@ -456,13 +459,9 @@ const App = () => {
         }
 
         setAlertText(successMsg);
-        setTargetGlucose(105);
-        setTargetKetones(0.2);
 
         await supabase.from('health_monitor').update({
             scenario: 'recovering',
-            glucose: 105,
-            ketones: 0.2,
             alert_text: successMsg,
             glucagon: finalGlucagon
         }).eq('short_id', patientSessionId);
