@@ -167,6 +167,14 @@ const App = () => {
                         setIsRegistered(false);
                     } else if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
                         const data = newData;
+
+                        // Synchronize pumping state based on alert text
+                        if (data.alert_text === "جاري الضخ تدريجياً...") {
+                            setIsPumping(true);
+                        } else if (data.alert_text && (data.alert_text.includes("تم إيقاف الضخ") || data.alert_text.includes("تم الضخ بالكامل"))) {
+                            setIsPumping(false);
+                        }
+
                         if (data.scenario && data.scenario !== scenario) {
                             setScenario(data.scenario);
                             setHasResult(true);
@@ -481,18 +489,25 @@ const App = () => {
         await supabase.from('health_monitor').update({
             scenario: 'paused',
             alert_text: successMsg,
-            glucagon: finalGlucagon
+            glucagon: finalGlucagon,
+            glucose: Math.round(glucose),
+            ketones: ketones
         }).eq('short_id', patientSessionId);
     };
 
-    const handleHardwareInject = () => {
+    const handleHardwareInject = async () => {
         if (isPumping) {
             handleStopPumping(glucagon);
         } else {
             if (glucagon > 0) {
                 setIsPumping(true);
                 setScenario('recovering'); // Unpause the simulation
-                setAlertText("جاري الضخ تدريجياً...");
+                const startMsg = "جاري الضخ تدريجياً...";
+                setAlertText(startMsg);
+                await supabase.from('health_monitor').update({
+                    scenario: 'recovering',
+                    alert_text: startMsg
+                }).eq('short_id', patientSessionId);
             } else {
                 setAlertText("عذراً، المحقنة فارغة! يرجى إعادة التعبئة قبل الضخ.");
             }
