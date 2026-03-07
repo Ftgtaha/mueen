@@ -13,11 +13,13 @@ import RegisterView from './components/RegisterView';
 import PatientSelectionView from './components/PatientSelectionView';
 import PatientProfileView from './components/PatientProfileView';
 import LabResultsView from './components/LabResultsView';
+import EntryView from './components/EntryView';
 import { Menu, User, Settings, AlertTriangle, Users } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
 const App = () => {
     // Session & User State
+    const [selectedRole, setSelectedRole] = useState(null); // 'patient' or 'admin' or null
     const [isAdminView, setIsAdminView] = useState(false);
     const [isRegistered, setIsRegistered] = useState(false);
     const [patientSessionId, setPatientSessionId] = useState(null);
@@ -125,6 +127,7 @@ const App = () => {
 
         if (urlParams.get('view') === 'admin') {
             setIsAdminView(true);
+            setSelectedRole('admin');
         } else {
             const savedSession = localStorage.getItem('mueen_session');
             if (savedSession) {
@@ -137,6 +140,7 @@ const App = () => {
                     });
                     setPatientSessionId(data.phone);
                     setIsRegistered(true);
+                    setSelectedRole('patient');
                 } catch (e) {
                     console.error("Session restoration failed:", e);
                 }
@@ -521,6 +525,8 @@ const App = () => {
         setPatientSessionId(null);
         setIsRegistered(false);
         setIsSidebarOpen(false);
+        setSelectedRole(null);
+        setIsAdminView(false);
     };
 
     const handleRefill = () => {
@@ -529,7 +535,16 @@ const App = () => {
         setAlertText("اموركْ طيبه !، تمتْ إعادةْ التعبئة.");
     };
 
-    if (!isRegistered && !isAdminView) {
+    if (!selectedRole) {
+        return <EntryView onSelectRole={(role) => {
+            setSelectedRole(role);
+            if (role === 'admin') {
+                setIsAdminView(true);
+            }
+        }} />;
+    }
+
+    if (selectedRole === 'patient' && !isRegistered) {
         return <RegisterView onComplete={(id, data) => {
             setPatientSessionId(id);
             setPatientData(data);
