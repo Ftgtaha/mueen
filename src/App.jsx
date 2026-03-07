@@ -14,7 +14,7 @@ import PatientSelectionView from './components/PatientSelectionView';
 import PatientProfileView from './components/PatientProfileView';
 import LabResultsView from './components/LabResultsView';
 import EntryView from './components/EntryView';
-import { Menu, User, Settings, AlertTriangle, Users } from 'lucide-react';
+import { Menu, User, Settings, AlertTriangle, Users, Volume2 } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
 const App = () => {
