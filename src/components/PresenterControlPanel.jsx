@@ -2,28 +2,12 @@ import React, { useEffect } from 'react';
 import { Syringe, RefreshCcw, Hand, AlertCircle, Activity, Flame, ShieldAlert, ArrowUpCircle } from 'lucide-react';
 
 const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, currentScenario, glucagon, isPumping, requiredDose }) => {
-
-    const handleKeyDown = (e) => {
-        if (e.key === '1') onStartEmergency('normal');
-        if (e.key === '2') onStartEmergency('pre_hypo');
-        if (e.key === '3') onStartEmergency('hypo_danger');
-        if (e.key === '2') onHardwareInject();
-        if (e.key === '5') onRefill();
-        if (e.key === '6') onStartEmergency('hyper');
-        if (e.key === '7') onStartEmergency('high_ketones');
-    };
-
-    useEffect(() => {
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onStartEmergency, onHardwareInject, onRefill]);
-
     const scenarios = [
-        { id: 'normal', name: 'سليم (80-180)', icon: Activity, color: 'text-mueen-cyan', num: '1' },
-        { id: 'pre_hypo', name: 'تحذير (70-79)', icon: ShieldAlert, color: 'text-yellow-500', num: '2' },
-        { id: 'hypo_danger', name: 'خطر هبوط (20-69)', icon: AlertCircle, color: 'text-red-500', num: '3' },
-        { id: 'hyper', name: 'ارتفاع (300+)', icon: ArrowUpCircle, color: 'text-orange-500', num: '6' },
-        { id: 'high_ketones', name: 'خطر كيتونات', icon: Flame, color: 'text-purple-500', num: '7' },
+        { id: 'normal', name: 'سليم (80-180)', icon: Activity, color: 'text-mueen-cyan' },
+        { id: 'pre_hypo', name: 'تحذير (70-79)', icon: ShieldAlert, color: 'text-yellow-500' },
+        { id: 'hypo_danger', name: 'خطر هبوط (20-69)', icon: AlertCircle, color: 'text-red-500' },
+        { id: 'hyper', name: 'ارتفاع (300+)', icon: ArrowUpCircle, color: 'text-orange-500' },
+        { id: 'high_ketones', name: 'خطر كيتونات', icon: Flame, color: 'text-purple-500' },
     ];
 
     return (
@@ -46,7 +30,6 @@ const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, c
                             >
                                 <Icon className={`w-4 h-4 mb-1 ${s.color}`} />
                                 <span className="text-[8px] text-white font-bold text-center leading-tight">{s.name}</span>
-                                <span className="text-[7px] text-gray-500 mt-0.5">[{s.num}]</span>
                             </button>
                         )
                     })}
@@ -81,13 +64,11 @@ const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, c
                     <button
                         onClick={onRefill}
                         className="col-span-1 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-400 flex items-center justify-center hover:bg-white/10 transition-all active:scale-95"
-                        title="إعادة التعبئة [5]"
+                        title="إعادة التعبئة"
                     >
                         <RefreshCcw className="w-5 h-5" />
                     </button>
                 </div>
-
-                <p className="text-center text-[9px] text-gray-600 italic">Keybinds: 1, 2, 3, 6, 7 (Scenarios) | 2, 5 (Hardware)</p>
             </div>
         </div>
     );
