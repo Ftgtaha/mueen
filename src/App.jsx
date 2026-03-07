@@ -665,6 +665,7 @@ const App = () => {
                         onHardwareInject={handleHardwareInject}
                         onRefill={handleRefill}
                         glucagon={glucagon}
+                        isPumping={isPumping}
                     />
                 )
             }
