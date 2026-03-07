@@ -743,9 +743,14 @@ const App = () => {
             <CalibrationModal
                 isVisible={showCalibration}
                 currentGlucose={glucose}
-                onCalibrate={(val) => {
+                onCalibrate={async (val) => {
                     setGlucose(val);
                     setTargetGlucose(val);
+                    if (patientSessionId) {
+                        await supabase.from('health_monitor').update({
+                            glucose: val
+                        }).eq('short_id', patientSessionId);
+                    }
                 }}
                 onClose={() => setShowCalibration(false)}
             />
