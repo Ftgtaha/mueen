@@ -55,6 +55,7 @@ const App = () => {
     const [emergencyReason, setEmergencyReason] = useState("");
     const [alertText, setAlertText] = useState("مُعين جاهز لمراقبة صحتك.. ضعه على الجلد للبدء بفحـص دوري.");
     const [isSpeaking, setIsSpeaking] = useState(false);
+    const [isMuted, setIsMuted] = useState(false);
 
     const rescueTimerRef = useRef(null);
     const audioRef = useRef(null);
@@ -89,6 +90,15 @@ const App = () => {
             return;
         }
         playedAlertsRef.current.add(filename);
+
+        // If muted, still trigger onFinish for logic flow but don't play audio
+        if (isMuted) {
+            if (onFinish) {
+                // Delay a bit to simulate speaking time for SOS logic
+                setTimeout(onFinish, 2000);
+            }
+            return;
+        }
 
         const audio = new Audio(`/voice/${filename}.mp3`);
         audioRef.current = audio;
@@ -552,7 +562,13 @@ const App = () => {
                             </div>
                         </div>
 
-                        <MueenAvatar scenario={scenario} alertText={alertText} isSpeaking={isSpeaking} />
+                        <MueenAvatar
+                            scenario={scenario}
+                            alertText={alertText}
+                            isSpeaking={isSpeaking}
+                            isMuted={isMuted}
+                            setIsMuted={setIsMuted}
+                        />
 
                         <VitalsDisplay
                             glucose={glucose}
