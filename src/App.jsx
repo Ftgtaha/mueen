@@ -431,7 +431,8 @@ const App = () => {
     };
 
     const STABLE_TARGET = 110;
-    const requiredDose = glucose < STABLE_TARGET ? parseFloat(((STABLE_TARGET - glucose) / 150).toFixed(2)) : 0;
+    // Don't show required dose if already in safe range (80+)
+    const requiredDose = glucose < 80 ? parseFloat(((STABLE_TARGET - glucose) / 150).toFixed(2)) : 0;
 
     useEffect(() => {
         let interval;
