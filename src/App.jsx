@@ -45,6 +45,7 @@ const App = () => {
     const [battery, setBattery] = useState(98);
     const [chartData, setChartData] = useState([]);
     const [isPumping, setIsPumping] = useState(false);
+    const [isPumpingDriver, setIsPumpingDriver] = useState(false);
 
     // Targets for smooth transition
     const [targetGlucose, setTargetGlucose] = useState(100);
@@ -444,8 +445,9 @@ const App = () => {
 
     useEffect(() => {
         let interval;
-        if (isPumping) {
-            interval = setInterval(async () => {
+        // Only run the artificial increment if THIS client started the pump (is driver)
+        if (isPumping && isPumpingDriver) {
+            interval = setInterval(() => {
                 let newGlucagon;
                 let newGlucose;
 
@@ -461,32 +463,33 @@ const App = () => {
 
                 setTargetGlucose(prev => Math.min(prev + 3, STABLE_TARGET));
 
-                // Push the live pumping update to the database so the other client sees the numbers move
+                // Push the live pumping update to the database for the receiver
                 if (patientSessionId) {
-                    await supabase.from('health_monitor').update({
+                    supabase.from('health_monitor').update({
                         glucose: newGlucose,
                         glucagon: parseFloat(newGlucagon.toFixed(2))
-                    }).eq('short_id', patientSessionId);
+                    }).eq('short_id', patientSessionId); // Fire and forget
                 }
             }, 500);
         }
         return () => clearInterval(interval);
-    }, [isPumping, patientSessionId]);
+    }, [isPumping, isPumpingDriver, patientSessionId]);
 
     useEffect(() => {
-        if (isPumping && glucose >= STABLE_TARGET) {
+        if (isPumping && isPumpingDriver && glucose >= STABLE_TARGET) {
             handleStopPumping(glucagon);
         }
-    }, [isPumping, glucose, glucagon]);
+    }, [isPumping, isPumpingDriver, glucose, glucagon]);
 
     useEffect(() => {
-        if (isPumping && glucagon <= 0) {
+        if (isPumping && isPumpingDriver && glucagon <= 0) {
             handleStopPumping(0);
         }
-    }, [glucagon, isPumping]);
+    }, [glucagon, isPumping, isPumpingDriver]);
 
     const handleStopPumping = async (finalGlucagon = glucagon) => {
         setIsPumping(false);
+        setIsPumpingDriver(false);
         playVoice('inject_success');
         setScenario('paused');
         setEmergencyCall(false);
@@ -513,9 +516,10 @@ const App = () => {
 
     const handleHardwareInject = async () => {
         if (isPumping) {
-            handleStopPumping(glucagon);
+            if (isPumpingDriver) handleStopPumping(glucagon);
         } else {
             if (glucagon > 0) {
+                setIsPumpingDriver(true);
                 setIsPumping(true);
                 setScenario('recovering'); // Unpause the simulation
                 const startMsg = "جاري الضخ تدريجياً...";
