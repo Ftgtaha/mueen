@@ -543,10 +543,16 @@ const App = () => {
         setIsAdminView(false);
     };
 
-    const handleRefill = () => {
+    const handleRefill = async () => {
         playVoice('refill_success');
         setGlucagon(5.0);
-        setAlertText("اموركْ طيبه !، تمتْ إعادةْ التعبئة.");
+        const refillMsg = "اموركْ طيبه !، تمتْ إعادةْ التعبئة.";
+        setAlertText(refillMsg);
+
+        await supabase.from('health_monitor').update({
+            glucagon: 5.0,
+            alert_text: refillMsg
+        }).eq('short_id', patientSessionId);
     };
 
     if (!selectedRole) {
