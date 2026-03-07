@@ -175,6 +175,7 @@ const App = () => {
                         // Synchronize pumping state based on alert text
                         if (data.alert_text === "جاري الضخ تدريجياً...") {
                             setIsPumping(true);
+                            setEmergencyCall(false); // Dismiss emergency UI if pumping starts
                         } else if (data.alert_text && (data.alert_text.includes("تم إيقاف الضخ") || data.alert_text.includes("تم الضخ بالكامل"))) {
                             setIsPumping(false);
                         }
@@ -709,6 +710,9 @@ const App = () => {
                 reason={emergencyReason}
                 contactName={patientData.emergencyName || "فهد (الأب)"}
                 contactPhone={patientData.emergencyPhone || "05XXXXXXXXX"}
+                onInject={handleHardwareInject}
+                isPumping={isPumping}
+                glucagonLevel={glucagon}
                 onCancel={() => {
                     setEmergencyCall(false);
                     setScenario('normal');

@@ -1,7 +1,7 @@
 import React from 'react';
 import { PhoneCall, AlertTriangle, MapPin } from 'lucide-react';
 
-const EmergencyCallUI = ({ isVisible, onCancel, reason, contactName, contactPhone }) => {
+const EmergencyCallUI = ({ isVisible, onCancel, reason, contactName, contactPhone, onInject, isPumping, glucagonLevel }) => {
     if (!isVisible) return null;
 
     return (
@@ -24,7 +24,7 @@ const EmergencyCallUI = ({ isVisible, onCancel, reason, contactName, contactPhon
             </div>
 
             {/* Simulated GPS Location */}
-            <div className="w-full max-w-xs glass-panel p-4 mb-10 flex items-center space-x-3 space-x-reverse border-red-500/30">
+            <div className="w-full max-w-xs glass-panel p-4 mb-6 flex items-center space-x-3 space-x-reverse border-red-500/30">
                 <div className="bg-red-500/20 p-2 rounded-lg">
                     <MapPin className="w-5 h-5 text-red-500" />
                 </div>
@@ -41,9 +41,24 @@ const EmergencyCallUI = ({ isVisible, onCancel, reason, contactName, contactPhon
                     <p className="text-mueen-cyan font-mono text-lg">{contactPhone}</p>
                 </div>
 
+                {/* Emergency Action Button */}
+                <button
+                    onClick={onInject}
+                    className={`w-full py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all active:scale-95 border-2 ${isPumping
+                        ? 'bg-red-500/20 border-red-500 text-red-400 animate-pulse'
+                        : 'bg-white text-red-950 border-white hover:bg-gray-100 shadow-[0_0_30px_rgba(255,255,255,0.3)]'
+                        }`}
+                >
+                    <Zap className={`w-6 h-6 ${isPumping ? 'animate-bounce' : ''}`} />
+                    <div className="text-right">
+                        <p className="text-lg leading-none">{isPumping ? 'إيقاف ضخ الجلوكاجون' : 'بدء ضخ الجلوكاجون (إنقاذ)'}</p>
+                        <p className="text-[10px] opacity-70 mt-1">المتبقي في العبوة: {glucagonLevel?.toFixed(2)} مل</p>
+                    </div>
+                </button>
+
                 <button
                     onClick={onCancel}
-                    className="w-full py-3 text-gray-400 hover:text-white transition-colors text-sm underline"
+                    className="w-full py-2 text-gray-500 hover:text-white transition-colors text-xs underline"
                 >
                     إلغاء المحاكاة (للمطور)
                 </button>
