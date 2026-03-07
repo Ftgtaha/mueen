@@ -182,6 +182,12 @@ const App = () => {
                         if (data.scenario && data.scenario !== scenario) {
                             setScenario(data.scenario);
                             setHasResult(true);
+                            // If we just paused, force the local display values to match the DB immediately 
+                            // to avoid simulation lag/mismatch
+                            if (data.scenario === 'paused') {
+                                if (data.glucose) setGlucose(data.glucose);
+                                if (data.ketones) setKetones(data.ketones);
+                            }
                         }
                         if (data.glucose) setTargetGlucose(data.glucose);
                         if (data.ketones) setTargetKetones(data.ketones);
