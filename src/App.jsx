@@ -430,6 +430,9 @@ const App = () => {
         });
     };
 
+    const STABLE_TARGET = 110;
+    const requiredDose = glucose < STABLE_TARGET ? parseFloat(((STABLE_TARGET - glucose) / 150).toFixed(2)) : 0;
+
     useEffect(() => {
         let interval;
         if (isPumping) {
@@ -438,12 +441,18 @@ const App = () => {
                     const nextVal = Math.max(0, prev - 0.02);
                     return parseFloat(nextVal.toFixed(2));
                 });
-                setGlucose(prev => prev + 3); // Directly increase actual glucose for UI to show immediately
-                setTargetGlucose(prev => prev + 3);
+                setGlucose(prev => Math.min(prev + 3, STABLE_TARGET)); // Directly increase actual glucose for UI to show immediately
+                setTargetGlucose(prev => Math.min(prev + 3, STABLE_TARGET));
             }, 500);
         }
         return () => clearInterval(interval);
     }, [isPumping]);
+
+    useEffect(() => {
+        if (isPumping && glucose >= STABLE_TARGET) {
+            handleStopPumping(glucagon);
+        }
+    }, [isPumping, glucose, glucagon]);
 
     useEffect(() => {
         if (isPumping && glucagon <= 0) {
@@ -674,6 +683,7 @@ const App = () => {
                         onRefill={handleRefill}
                         glucagon={glucagon}
                         isPumping={isPumping}
+                        requiredDose={requiredDose}
                     />
                 )
             }

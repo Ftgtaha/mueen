@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Syringe, RefreshCcw, Hand, AlertCircle, Activity, Flame, ShieldAlert, ArrowUpCircle } from 'lucide-react';
 
-const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, currentScenario, glucagon, isPumping }) => {
+const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, currentScenario, glucagon, isPumping, requiredDose }) => {
 
     const handleKeyDown = (e) => {
         if (e.key === '1') onStartEmergency('normal');
@@ -56,13 +56,26 @@ const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, c
                 <div className="grid grid-cols-5 gap-2">
                     <button
                         onClick={onHardwareInject}
-                        className={`col-span-4 py-3 px-4 rounded-xl font-bold flex items-center justify-center space-x-2 space-x-reverse transition-all active:scale-95 border ${isPumping
+                        className={`col-span-4 py-2 px-4 rounded-xl font-bold flex flex-col items-center justify-center transition-all active:scale-95 border ${isPumping
                             ? 'bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-pulse'
                             : 'bg-mueen-blue/20 border-mueen-blue/50 text-mueen-cyan hover:bg-mueen-blue/30 shadow-[0_0_20px_rgba(41,121,255,0.2)]'
                             }`}
                     >
-                        <Syringe className={`w-5 h-5 ${isPumping ? 'animate-bounce' : ''}`} />
-                        <span>{isPumping ? `إيقاف الضخ [${glucagon.toFixed(2)}]` : `بدء الضخ [${glucagon.toFixed(2)}]`}</span>
+                        <div className="flex items-center space-x-2 space-x-reverse mb-1">
+                            <Syringe className={`w-5 h-5 ${isPumping ? 'animate-bounce' : ''}`} />
+                            <span className="text-sm">{isPumping ? 'إيقاف الضخ' : 'بدء الضخ'}</span>
+                            <span className="text-xs opacity-70">[{glucagon.toFixed(2)} متبقي]</span>
+                        </div>
+                        {!isPumping && requiredDose > 0 && (
+                            <span className="text-[10px] bg-mueen-blue/30 text-white px-2 py-0.5 rounded-full mt-0.5 border border-mueen-cyan/30">
+                                يحتاج المريض: {requiredDose} مل تقريباً
+                            </span>
+                        )}
+                        {!isPumping && requiredDose === 0 && (
+                            <span className="text-[10px] text-gray-400 mt-0.5">
+                                حالة استقرار (لا يحتاج ضخ)
+                            </span>
+                        )}
                     </button>
 
                     <button
