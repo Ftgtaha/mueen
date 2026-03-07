@@ -429,7 +429,7 @@ const App = () => {
                     const nextVal = Math.max(0, prev - 0.1);
                     return parseFloat(nextVal.toFixed(1));
                 });
-            }, 500);
+            }, 1000);
         }
         return () => clearInterval(interval);
     }, [isPumping]);
