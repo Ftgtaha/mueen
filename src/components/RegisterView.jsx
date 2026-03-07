@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Phone, ShieldCheck, HeartPulse, Activity, Ruler, Weight, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { User, Users, Phone, ShieldCheck, HeartPulse, Activity, Ruler, Weight, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
 const RegisterView = ({ onComplete }) => {
