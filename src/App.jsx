@@ -45,7 +45,6 @@ const App = () => {
     const [battery, setBattery] = useState(98);
     const [chartData, setChartData] = useState([]);
     const [isPumping, setIsPumping] = useState(false);
-    const [isPumpingDriver, setIsPumpingDriver] = useState(false);
 
     // Targets for smooth transition
     const [targetGlucose, setTargetGlucose] = useState(100);
@@ -445,51 +444,33 @@ const App = () => {
 
     useEffect(() => {
         let interval;
-        // Only run the artificial increment if THIS client started the pump (is driver)
-        if (isPumping && isPumpingDriver) {
+        if (isPumping) {
             interval = setInterval(() => {
-                let newGlucagon;
-                let newGlucose;
-
                 setGlucagon(prev => {
-                    newGlucagon = Math.max(0, prev - 0.02);
-                    return parseFloat(newGlucagon.toFixed(2));
+                    const nextVal = Math.max(0, prev - 0.02);
+                    return parseFloat(nextVal.toFixed(2));
                 });
-
-                setGlucose(prev => {
-                    newGlucose = Math.min(prev + 3, STABLE_TARGET);
-                    return newGlucose;
-                });
-
+                setGlucose(prev => Math.min(prev + 3, STABLE_TARGET));
                 setTargetGlucose(prev => Math.min(prev + 3, STABLE_TARGET));
-
-                // Push the live pumping update to the database for the receiver
-                if (patientSessionId) {
-                    supabase.from('health_monitor').update({
-                        glucose: newGlucose,
-                        glucagon: parseFloat(newGlucagon.toFixed(2))
-                    }).eq('short_id', patientSessionId); // Fire and forget
-                }
             }, 500);
         }
         return () => clearInterval(interval);
-    }, [isPumping, isPumpingDriver, patientSessionId]);
+    }, [isPumping]);
 
     useEffect(() => {
-        if (isPumping && isPumpingDriver && glucose >= STABLE_TARGET) {
+        if (isPumping && glucose >= STABLE_TARGET) {
             handleStopPumping(glucagon);
         }
-    }, [isPumping, isPumpingDriver, glucose, glucagon]);
+    }, [isPumping, glucose, glucagon]);
 
     useEffect(() => {
-        if (isPumping && isPumpingDriver && glucagon <= 0) {
+        if (isPumping && glucagon <= 0) {
             handleStopPumping(0);
         }
-    }, [glucagon, isPumping, isPumpingDriver]);
+    }, [glucagon, isPumping]);
 
     const handleStopPumping = async (finalGlucagon = glucagon) => {
         setIsPumping(false);
-        setIsPumpingDriver(false);
         playVoice('inject_success');
         setScenario('paused');
         setEmergencyCall(false);
@@ -516,10 +497,9 @@ const App = () => {
 
     const handleHardwareInject = async () => {
         if (isPumping) {
-            if (isPumpingDriver) handleStopPumping(glucagon);
+            handleStopPumping(glucagon);
         } else {
             if (glucagon > 0) {
-                setIsPumpingDriver(true);
                 setIsPumping(true);
                 setScenario('recovering'); // Unpause the simulation
                 const startMsg = "جاري الضخ تدريجياً...";
