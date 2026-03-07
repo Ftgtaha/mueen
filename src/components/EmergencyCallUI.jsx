@@ -1,5 +1,5 @@
 import React from 'react';
-import { PhoneCall, AlertTriangle, MapPin } from 'lucide-react';
+import { PhoneCall, AlertTriangle, MapPin, Zap } from 'lucide-react';
 
 const EmergencyCallUI = ({ isVisible, onCancel, reason, contactName, contactPhone, onInject, isPumping, glucagonLevel }) => {
     if (!isVisible) return null;
