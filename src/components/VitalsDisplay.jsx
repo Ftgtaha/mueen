@@ -71,7 +71,7 @@ const VitalsDisplay = ({ glucose, ketones, glucagonLevel, battery, isPumping, is
                         <span className="text-gray-400 text-[10px] font-medium leading-tight truncate">كمية القلوكاجون</span>
                     </div>
                     <div className="flex items-baseline space-x-1 space-x-reverse flex-shrink-0 mr-2">
-                        <span className="text-sm font-bold text-mueen-cyan leading-none">{glucagonLevel.toFixed(1)}</span>
+                        <span className="text-sm font-bold text-mueen-cyan leading-none">{glucagonLevel.toFixed(2)}</span>
                         <span className="text-[8px] text-gray-500 font-bold uppercase leading-none">ملي</span>
                     </div>
                 </div>

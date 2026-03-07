@@ -220,7 +220,7 @@ const App = () => {
         const interval = setInterval(() => {
             let stepSizeG = 2;
             if (isPumping) {
-                stepSizeG = 25;
+                stepSizeG = 4;
             } else if (scenario === 'paused') {
                 return; // Freeze the simulation entirely
             } else if (scenario === 'pre_hypo' || scenario === 'normal' || scenario === 'recovering' || scenario === 'recovery') {
@@ -430,11 +430,11 @@ const App = () => {
         if (isPumping) {
             interval = setInterval(() => {
                 setGlucagon(prev => {
-                    const nextVal = Math.max(0, prev - 0.1);
-                    return parseFloat(nextVal.toFixed(1));
+                    const nextVal = Math.max(0, prev - 0.02);
+                    return parseFloat(nextVal.toFixed(2));
                 });
-                setTargetGlucose(prev => prev + 25);
-            }, 1000);
+                setTargetGlucose(prev => prev + 4);
+            }, 500);
         }
         return () => clearInterval(interval);
     }, [isPumping]);
@@ -455,7 +455,7 @@ const App = () => {
             sosSequenceRef.current = null;
         }
 
-        let successMsg = `تم إيقاف الضخ. الكمية المتبقية ${finalGlucagon.toFixed(1)} مل.`;
+        let successMsg = `تم إيقاف الضخ. الكمية المتبقية ${finalGlucagon.toFixed(2)} مل.`;
         if (finalGlucagon <= 0) {
             successMsg = "تم الضخ بالكامل! نذكرك أن الكمية صفر، وتحتاج تعبئة.";
         }

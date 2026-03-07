@@ -62,7 +62,7 @@ const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, c
                             }`}
                     >
                         <Syringe className={`w-5 h-5 ${isPumping ? 'animate-bounce' : ''}`} />
-                        <span>{isPumping ? `إيقاف الضخ [${glucagon.toFixed(1)}]` : `بدء الضخ [${glucagon.toFixed(1)}]`}</span>
+                        <span>{isPumping ? `إيقاف الضخ [${glucagon.toFixed(2)}]` : `بدء الضخ [${glucagon.toFixed(2)}]`}</span>
                     </button>
 
                     <button
