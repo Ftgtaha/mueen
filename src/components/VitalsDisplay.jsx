@@ -1,7 +1,7 @@
 import React from 'react';
-import { Activity, ShieldCheck, Zap, Droplet, Battery } from 'lucide-react';
+import { Activity, ShieldCheck, Zap, Droplet, Battery, RefreshCcw } from 'lucide-react';
 
-const VitalsDisplay = ({ glucose, ketones, glucagonLevel, battery, isPumping, isScanning, hasResult }) => {
+const VitalsDisplay = ({ glucose, ketones, glucagonLevel, battery, isPumping, isScanning, hasResult, requiredDose, onHardwareInject, onRefill }) => {
 
     if (!hasResult && !isScanning) {
         return (
@@ -83,6 +83,41 @@ const VitalsDisplay = ({ glucose, ketones, glucagonLevel, battery, isPumping, is
                     </div>
                     <span className="text-sm font-bold">{battery}%</span>
                 </div>
+            </div>
+
+            {/* Patient Action Buttons */}
+            <div className="grid grid-cols-5 gap-2 mt-4">
+                <button
+                    onClick={onHardwareInject}
+                    className={`col-span-4 py-2 px-4 rounded-xl font-bold flex flex-col items-center justify-center transition-all active:scale-95 border ${isPumping
+                        ? 'bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-pulse'
+                        : 'bg-mueen-blue/20 border-mueen-blue/50 text-mueen-cyan hover:bg-mueen-blue/30 shadow-[0_0_20px_rgba(41,121,255,0.2)]'
+                        }`}
+                >
+                    <div className="flex items-center space-x-2 space-x-reverse mb-1">
+                        <Zap className={`w-5 h-5 ${isPumping ? 'animate-bounce' : ''}`} />
+                        <span className="text-sm">{isPumping ? 'إيقاف الضخ' : 'تشغيل الضخ اليدوي'}</span>
+                        <span className="text-xs opacity-70">[{glucagonLevel.toFixed(2)} متبقي]</span>
+                    </div>
+                    {!isPumping && requiredDose > 0 && (
+                        <span className="text-[10px] bg-mueen-blue/30 text-white px-2 py-0.5 rounded-full mt-0.5 border border-mueen-cyan/30">
+                            يحتاج المريض: {requiredDose} مل تقريباً
+                        </span>
+                    )}
+                    {!isPumping && requiredDose === 0 && (
+                        <span className="text-[10px] text-gray-400 mt-0.5">
+                            حالة استقرار (لا يحتاج ضخ)
+                        </span>
+                    )}
+                </button>
+
+                <button
+                    onClick={onRefill}
+                    className="col-span-1 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-400 flex items-center justify-center hover:bg-white/10 transition-all active:scale-95"
+                    title="إعادة التعبئة"
+                >
+                    <RefreshCcw className="w-5 h-5" />
+                </button>
             </div>
         </div>
     );

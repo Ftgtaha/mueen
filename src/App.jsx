@@ -623,6 +623,9 @@ const App = () => {
                             isPumping={isPumping}
                             isScanning={isScanning}
                             hasResult={hasResult}
+                            requiredDose={requiredDose}
+                            onHardwareInject={handleHardwareInject}
+                            onRefill={handleRefill}
                         />
 
                         {hasResult && (
