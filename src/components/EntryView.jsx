@@ -38,12 +38,12 @@ const EntryView = ({ onSelectRole }) => {
                         className="w-full group relative overflow-hidden rounded-2xl p-1 transition-all duration-300 hover:scale-[1.02] active:scale-95"
                     >
                         <div className="absolute inset-0 bg-gradient-to-r from-mueen-cyan/20 to-mueen-blue/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className="relative glass-panel bg-gradient-to-br from-[#13051c] to-[#0d0714] border border-white/5 group-hover:border-mueen-cyan/30 p-6 flex items-center justify-between rounded-xl">
+                        <div className="relative glass-panel bg-gradient-to-br from-[#13051c] to-[#0d0714] border border-white/5 group-hover:border-mueen-cyan/30 p-6 flex items-center justify-end gap-5 rounded-xl">
                             <div className="text-right">
                                 <h3 className="text-lg font-bold text-white mb-1 group-hover:text-mueen-cyan transition-colors">دخول كمريض</h3>
                                 <p className="text-xs text-gray-400">لإنشاء حساب أو متابعة حالتك الصحية</p>
                             </div>
-                            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-mueen-cyan/10 transition-colors">
+                            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-mueen-cyan/10 transition-colors">
                                 <User className="w-6 h-6 text-gray-400 group-hover:text-mueen-cyan transition-colors" />
                             </div>
                         </div>
@@ -55,12 +55,12 @@ const EntryView = ({ onSelectRole }) => {
                         className="w-full group relative overflow-hidden rounded-2xl p-1 transition-all duration-300 hover:scale-[1.02] active:scale-95"
                     >
                         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className="relative glass-panel bg-gradient-to-br from-[#13051c] to-[#0d0714] border border-white/5 group-hover:border-purple-400/30 p-6 flex items-center justify-between rounded-xl">
+                        <div className="relative glass-panel bg-gradient-to-br from-[#13051c] to-[#0d0714] border border-white/5 group-hover:border-purple-400/30 p-6 flex items-center justify-end gap-5 rounded-xl">
                             <div className="text-right">
-                                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-purple-400 transition-colors">مقدم الرعاية (أدمن)</h3>
+                                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-purple-400 transition-colors">تجربة السيناريوهات(ادمن)</h3>
                                 <p className="text-xs text-gray-400">لمتابعة المرضى وتسجيل بياناتهم</p>
                             </div>
-                            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-purple-500/10 transition-colors">
+                            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-purple-500/10 transition-colors">
                                 <Shield className="w-6 h-6 text-gray-400 group-hover:text-purple-400 transition-colors" />
                             </div>
                         </div>
