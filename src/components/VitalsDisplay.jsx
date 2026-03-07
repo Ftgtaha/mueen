@@ -1,7 +1,7 @@
 import React from 'react';
 import { Activity, ShieldCheck, Zap, Droplet, Battery } from 'lucide-react';
 
-const VitalsDisplay = ({ glucose, ketones, glucagonLevel, battery, isScanning, hasResult }) => {
+const VitalsDisplay = ({ glucose, ketones, glucagonLevel, battery, isPumping, isScanning, hasResult }) => {
 
     if (!hasResult && !isScanning) {
         return (
@@ -67,11 +67,11 @@ const VitalsDisplay = ({ glucose, ketones, glucagonLevel, battery, isScanning, h
             <div className="grid grid-cols-2 gap-4">
                 <div className="glass-panel p-3 flex items-center justify-between min-h-[50px]">
                     <div className="flex items-center space-x-2 space-x-reverse min-w-0 flex-1">
-                        <Droplet className="w-4 h-4 text-mueen-blue flex-shrink-0" />
+                        <Droplet className={`w-4 h-4 flex-shrink-0 ${isPumping ? 'text-red-500 animate-pulse' : 'text-mueen-blue'}`} />
                         <span className="text-gray-400 text-[10px] font-medium leading-tight truncate">كمية القلوكاجون</span>
                     </div>
                     <div className="flex items-baseline space-x-1 space-x-reverse flex-shrink-0 mr-2">
-                        <span className="text-sm font-bold text-mueen-cyan leading-none">{(glucagonLevel * 0.5).toFixed(1)}</span>
+                        <span className="text-sm font-bold text-mueen-cyan leading-none">{glucagonLevel.toFixed(1)}</span>
                         <span className="text-[8px] text-gray-500 font-bold uppercase leading-none">ملي</span>
                     </div>
                 </div>

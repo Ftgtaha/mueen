@@ -41,9 +41,10 @@ const App = () => {
     // Vitals
     const [glucose, setGlucose] = useState(100);
     const [ketones, setKetones] = useState(0.2);
-    const [glucagon, setGlucagon] = useState(2);
+    const [glucagon, setGlucagon] = useState(1.0);
     const [battery, setBattery] = useState(98);
     const [chartData, setChartData] = useState([]);
+    const [isPumping, setIsPumping] = useState(false);
 
     // Targets for smooth transition
     const [targetGlucose, setTargetGlucose] = useState(100);
@@ -420,37 +421,63 @@ const App = () => {
         });
     };
 
-    const handleHardwareInject = async () => {
-        if (glucagon > 0) {
-            const nextGlucagon = Math.max(0, glucagon - 1);
-            playVoice('inject_success');
-            setGlucagon(nextGlucagon);
-            setScenario('recovering');
-            setEmergencyCall(false);
-            if (sosSequenceRef.current) {
-                if (typeof sosSequenceRef.current === 'number') clearTimeout(sosSequenceRef.current);
-                sosSequenceRef.current = null;
-            }
+    useEffect(() => {
+        let interval;
+        if (isPumping) {
+            interval = setInterval(() => {
+                setGlucagon(prev => {
+                    const nextVal = Math.max(0, prev - 0.1);
+                    return parseFloat(nextVal.toFixed(1));
+                });
+            }, 500);
+        }
+        return () => clearInterval(interval);
+    }, [isPumping]);
 
-            let successMsg = "بَشّركْ! ... تم الضخ بنجاح.";
-            if (nextGlucagon === 0) {
-                successMsg = "تم الضخ بنجاح! نذكرك أن الكمية صفر، وتحتاج تعبئة.";
-            }
+    useEffect(() => {
+        if (isPumping && glucagon <= 0) {
+            handleStopPumping(0);
+        }
+    }, [glucagon, isPumping]);
 
-            setAlertText(successMsg);
-            setTargetGlucose(105);
-            setTargetKetones(0.2);
+    const handleStopPumping = async (finalGlucagon = glucagon) => {
+        setIsPumping(false);
+        playVoice('inject_success');
+        setScenario('recovering');
+        setEmergencyCall(false);
+        if (sosSequenceRef.current) {
+            if (typeof sosSequenceRef.current === 'number') clearTimeout(sosSequenceRef.current);
+            sosSequenceRef.current = null;
+        }
 
-            await supabase.from('health_monitor').update({
-                scenario: 'recovering',
-                glucose: 105,
-                ketones: 0.2,
-                alert_text: successMsg,
-                glucagon: nextGlucagon
-            }).eq('short_id', patientSessionId);
+        let successMsg = `تم إيقاف الضخ. الكمية المتبقية ${finalGlucagon.toFixed(1)} مل.`;
+        if (finalGlucagon <= 0) {
+            successMsg = "تم الضخ بالكامل! نذكرك أن الكمية صفر، وتحتاج تعبئة.";
+        }
+
+        setAlertText(successMsg);
+        setTargetGlucose(105);
+        setTargetKetones(0.2);
+
+        await supabase.from('health_monitor').update({
+            scenario: 'recovering',
+            glucose: 105,
+            ketones: 0.2,
+            alert_text: successMsg,
+            glucagon: finalGlucagon
+        }).eq('short_id', patientSessionId);
+    };
+
+    const handleHardwareInject = () => {
+        if (isPumping) {
+            handleStopPumping(glucagon);
         } else {
-            setAlertText("عذراً، المحقنة فارغة! يرجى إعادة التعبئة قبل الضخ.");
-            playVoice('warning_refill'); // Assuming we might add this or handle it gracefully
+            if (glucagon > 0) {
+                setIsPumping(true);
+                setAlertText("جاري الضخ تدريجياً...");
+            } else {
+                setAlertText("عذراً، المحقنة فارغة! يرجى إعادة التعبئة قبل الضخ.");
+            }
         }
     };
 
@@ -463,7 +490,7 @@ const App = () => {
 
     const handleRefill = () => {
         playVoice('refill_success');
-        setGlucagon(2);
+        setGlucagon(1.0);
         setAlertText("اموركْ طيبه !، تمتْ إعادةْ التعبئة.");
     };
 
@@ -575,6 +602,7 @@ const App = () => {
                             ketones={ketones}
                             battery={battery}
                             glucagonLevel={glucagon}
+                            isPumping={isPumping}
                             isScanning={isScanning}
                             hasResult={hasResult}
                         />

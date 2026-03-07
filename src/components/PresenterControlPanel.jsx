@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Syringe, RefreshCcw, Hand, AlertCircle, Activity, Flame, ShieldAlert, ArrowUpCircle } from 'lucide-react';
 
-const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, currentScenario, glucagon }) => {
+const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, currentScenario, glucagon, isPumping }) => {
 
     const handleKeyDown = (e) => {
         if (e.key === '1') onStartEmergency('normal');
@@ -56,10 +56,13 @@ const PresenterControlPanel = ({ onStartEmergency, onHardwareInject, onRefill, c
                 <div className="grid grid-cols-5 gap-2">
                     <button
                         onClick={onHardwareInject}
-                        className="col-span-4 py-3 px-4 rounded-xl bg-mueen-blue/20 border border-mueen-blue/50 text-mueen-cyan font-bold flex items-center justify-center space-x-2 space-x-reverse hover:bg-mueen-blue/30 transition-all active:scale-95 shadow-[0_0_20px_rgba(41,121,255,0.2)]"
+                        className={`col-span-4 py-3 px-4 rounded-xl font-bold flex items-center justify-center space-x-2 space-x-reverse transition-all active:scale-95 shadow-[0_0_20px_rgba(41,121,255,0.2)] ${isPumping
+                                ? 'bg-red-500/20 border-red-500/50 text-red-500 hover:bg-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                                : 'bg-mueen-blue/20 border-mueen-blue/50 text-mueen-cyan hover:bg-mueen-blue/30'
+                            }`}
                     >
-                        <Syringe className="w-5 h-5" />
-                        <span>محاكاة ضغطة زر الحقن [{glucagon}]</span>
+                        <Syringe className={`w-5 h-5 ${isPumping ? 'animate-bounce' : ''}`} />
+                        <span>{isPumping ? `إيقاف الضخ [${glucagon.toFixed(1)}]` : `بدء الضخ محاكي [${glucagon.toFixed(1)}]`}</span>
                     </button>
 
                     <button
