@@ -59,11 +59,17 @@ const App = () => {
     const [alertText, setAlertText] = useState("مُعين جاهز لمراقبة صحتك.. ضعه على الجلد للبدء بفحـص دوري.");
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
+    const [hasInteracted, setHasInteracted] = useState(false);
 
     const rescueTimerRef = useRef(null);
     const audioRef = useRef(null);
     const playedAlertsRef = useRef(new Set());
     const sosSequenceRef = useRef(null);
+
+    // Clear alerts whenever the scenario changes to allow re-playing sounds if we return to a state
+    useEffect(() => {
+        playedAlertsRef.current.clear();
+    }, [scenario]);
 
     const playVoice = (voiceId, onFinish) => {
         const voiceMap = {
@@ -567,6 +573,7 @@ const App = () => {
     if (!selectedRole) {
         return <EntryView onSelectRole={(role) => {
             setSelectedRole(role);
+            setHasInteracted(true);
             if (role === 'admin') {
                 setIsAdminView(true);
             }
@@ -578,6 +585,7 @@ const App = () => {
             setPatientSessionId(id);
             setPatientData(data);
             setIsRegistered(true);
+            setHasInteracted(true);
         }} />;
     }
 
@@ -755,7 +763,29 @@ const App = () => {
                     />
                 )
             }
-        </div >
+
+            {/* Browser Autoplay Satisfaction Overlay (for returning patients) */}
+            {!hasInteracted && selectedRole === 'patient' && (
+                <div className="fixed inset-0 z-[100] bg-[#090314]/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-700">
+                    <div className="w-24 h-24 bg-mueen-cyan/10 rounded-full flex items-center justify-center mb-6 border border-mueen-cyan/20 animate-pulse">
+                        <Volume2 className="w-12 h-12 text-mueen-cyan" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-white mb-2 underline">تفعيل المراقبة الصوتية</h2>
+                    <p className="text-gray-400 text-xs mb-10 max-w-xs leading-relaxed">
+                        يرجى الضغط على الزر أدناه لتفعيل التنبيهات الصوتية والمراقبة الذكاء الاصطناعي على هذا الجهاز.
+                    </p>
+                    <button
+                        onClick={() => {
+                            setHasInteracted(true);
+                            playVoice('result_normal');
+                        }}
+                        className="px-10 py-4 bg-mueen-cyan text-mueen-dark font-bold rounded-2xl hover:scale-105 transition-all active:scale-95 shadow-[0_0_30px_rgba(41,255,255,0.2)]"
+                    >
+                        ابدأ المراقبة الآن
+                    </button>
+                </div>
+            )}
+        </div>
     );
 };
 
