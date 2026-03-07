@@ -92,7 +92,7 @@ const RegisterView = ({ onComplete }) => {
                     short_id: phone,
                     patient_name: name,
                     scenario: 'standby',
-                    glucose: 100,
+                    glucose: 110,
                     ketones: 0.2,
                     alert_text: 'تم التسجيل بنجاح. ضعه على الجلد للبدء.',
                     patient_age: age,

@@ -608,7 +608,7 @@ const App = () => {
                             emergencyPhone: p.emergency_phone,
                             bloodType: 'O+'
                         });
-                        setGlucose(p.glucose || 100);
+                        setGlucose(p.glucose || 110);
                         setGlucagon(p.glucagon !== undefined ? p.glucagon : 100);
                         setScenario(p.scenario || 'standby');
                         setHasResult(true);
