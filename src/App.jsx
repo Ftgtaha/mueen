@@ -64,10 +64,6 @@ const App = () => {
     const sosSequenceRef = useRef(null);
 
     const playVoice = (voiceId, onFinish) => {
-        if (audioRef.current) {
-            audioRef.current.pause();
-        }
-
         const voiceMap = {
             'scanning': 'لَحْضة,  بنفحص سكرك الان',
             'warning_low': 'انتَبِه,  سكركْ بدا ينخفض,  بس تأكد بِواسِطَة الدم',
@@ -90,6 +86,15 @@ const App = () => {
             if (onFinish) onFinish(); // CRITICAL: Call callback even if voice is skipped to prevent SOS chain break
             return;
         }
+
+        // IMPORTANT: Must pause existing audio AFTER the deduplication check!
+        // If pause happens before, concurrent React effects will pause the current audio,
+        // and then the second effect will skip playing because of the deduplication check,
+        // resulting in complete silence (the bug you were seeing).
+        if (audioRef.current) {
+            audioRef.current.pause();
+        }
+
         playedAlertsRef.current.add(filename);
 
         // If muted, still trigger onFinish for logic flow but don't play audio
