@@ -433,7 +433,8 @@ const App = () => {
                     const nextVal = Math.max(0, prev - 0.02);
                     return parseFloat(nextVal.toFixed(2));
                 });
-                setTargetGlucose(prev => prev + 4);
+                setGlucose(prev => prev + 3); // Directly increase actual glucose for UI to show immediately
+                setTargetGlucose(prev => prev + 3);
             }, 500);
         }
         return () => clearInterval(interval);
