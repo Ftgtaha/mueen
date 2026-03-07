@@ -117,8 +117,16 @@ const App = () => {
             if (onFinish) onFinish();
         };
         audio.onpause = () => setIsSpeaking(false);
+        audio.onerror = () => {
+            setIsSpeaking(false);
+            if (onFinish) onFinish();
+        };
 
-        audio.play().catch(e => console.log("Audio play blocked or file missing:", e));
+        audio.play().catch(e => {
+            console.log("Audio play blocked or file missing:", e);
+            setIsSpeaking(false);
+            if (onFinish) onFinish();
+        });
     };
 
     useEffect(() => {
