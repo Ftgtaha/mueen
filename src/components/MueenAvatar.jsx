@@ -53,22 +53,26 @@ const MueenAvatar = ({ scenario, alertText, isSpeaking, isMuted, setIsMuted }) =
             </div>
 
             {/* Speech Bubble / Alert Text */}
-            <div className={`mt-6 w-full max-w-[90%] p-4 rounded-xl border border-mueen-blue/20 relative transition-all duration-300 ${alertText ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'} bg-[#1a0b3c]/80 backdrop-blur-sm`}>
+            <div className={`mt-6 w-full max-w-[90%] p-4 rounded-xl border border-mueen-blue/20 relative transition-all duration-300 ${alertText ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'} bg-[#1a0b3c]/80 backdrop-blur-sm`} dir="rtl">
                 {/* Pointer triangle */}
                 <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-tl-sm bg-[#1a0b3c]/80 border-t border-l border-mueen-blue/20 rotate-45"></div>
 
-                <div className="flex items-start space-x-3 space-x-reverse">
-                    <button
-                        onClick={() => setIsMuted(!isMuted)}
-                        className={`flex-shrink-0 p-2.5 rounded-full transition-all duration-300 border shadow-lg ${isMuted
+                <div className="flex items-center gap-5">
+                    <div className="flex flex-col items-center gap-1.5 min-w-[50px]">
+                        <button
+                            onClick={() => setIsMuted(!isMuted)}
+                            className={`p-2.5 rounded-full transition-all duration-300 border shadow-lg ${isMuted
                                 ? 'bg-red-500/10 border-red-500/30 text-red-400 shadow-red-500/5'
                                 : 'bg-mueen-cyan/10 border-mueen-cyan/30 text-mueen-cyan shadow-mueen-cyan/10 hover:bg-mueen-cyan/20'
-                            } active:scale-90 hover:scale-110`}
-                        title={isMuted ? "Unmute" : "Mute"}
-                    >
-                        {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5 font-bold" />}
-                    </button>
-                    <p className="text-sm font-medium leading-relaxed text-gray-200">
+                                } active:scale-95 hover:scale-105`}
+                        >
+                            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5 font-bold" />}
+                        </button>
+                        <span className={`text-[9px] font-bold uppercase tracking-tight ${isMuted ? 'text-red-400/70' : 'text-mueen-cyan/70'}`}>
+                            {isMuted ? 'تشغيل' : 'كتم'}
+                        </span>
+                    </div>
+                    <p className="text-sm font-medium leading-relaxed text-gray-200 flex-1 text-right">
                         {alertText || "..."}
                     </p>
                 </div>
