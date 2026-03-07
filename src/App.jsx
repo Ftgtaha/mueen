@@ -41,7 +41,7 @@ const App = () => {
     // Vitals
     const [glucose, setGlucose] = useState(100);
     const [ketones, setKetones] = useState(0.2);
-    const [glucagon, setGlucagon] = useState(1.0);
+    const [glucagon, setGlucagon] = useState(5.0);
     const [battery, setBattery] = useState(98);
     const [chartData, setChartData] = useState([]);
     const [isPumping, setIsPumping] = useState(false);
@@ -174,7 +174,7 @@ const App = () => {
                         if (data.glucose) setTargetGlucose(data.glucose);
                         if (data.ketones) setTargetKetones(data.ketones);
                         if (data.alert_text) setAlertText(data.alert_text);
-                        if (data.glucagon !== undefined) setGlucagon(data.glucagon > 2 ? 2 : data.glucagon);
+                        if (data.glucagon !== undefined) setGlucagon(data.glucagon > 5 ? 5 : data.glucagon);
                     }
                 })
                 .subscribe();
@@ -191,7 +191,7 @@ const App = () => {
                     setTargetGlucose(data.glucose);
                     setTargetKetones(data.ketones);
                     setAlertText(data.alert_text);
-                    if (data.glucagon !== undefined) setGlucagon(data.glucagon > 2 ? 2 : data.glucagon);
+                    if (data.glucagon !== undefined) setGlucagon(data.glucagon > 5 ? 5 : data.glucagon);
                     setHasResult(true);
                 }
             };
@@ -508,7 +508,7 @@ const App = () => {
 
     const handleRefill = () => {
         playVoice('refill_success');
-        setGlucagon(1.0);
+        setGlucagon(5.0);
         setAlertText("اموركْ طيبه !، تمتْ إعادةْ التعبئة.");
     };
 
