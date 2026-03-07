@@ -368,7 +368,7 @@ const App = () => {
                 sosSequenceRef.current = setTimeout(() => {
                     setAlertText("ماشفنا منك استجابة!! الآن بنتواصل مع أهلك.");
                     playVoice('calling_emergency', step3_ShowUI);
-                }, 3000);
+                }, 8000);
             };
 
             const step1_Danger = () => {
