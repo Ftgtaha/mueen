@@ -509,6 +509,14 @@ const App = () => {
                 setScenario('recovering'); // Unpause the simulation
                 const startMsg = "جاري الضخ تدريجياً...";
                 setAlertText(startMsg);
+
+                // Cancel Emergency flow as patient is receiving treatment
+                setEmergencyCall(false);
+                if (sosSequenceRef.current) {
+                    if (typeof sosSequenceRef.current === 'number') clearTimeout(sosSequenceRef.current);
+                    sosSequenceRef.current = null;
+                }
+
                 await supabase.from('health_monitor').update({
                     scenario: 'recovering',
                     alert_text: startMsg,
