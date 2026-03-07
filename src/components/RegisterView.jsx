@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { User, Phone, ShieldCheck, HeartPulse, Activity, Ruler, Weight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { User, Phone, ShieldCheck, HeartPulse, Activity, Ruler, Weight, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
 const RegisterView = ({ onComplete }) => {
+    // Registration State
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [age, setAge] = useState('');
@@ -14,7 +15,55 @@ const RegisterView = ({ onComplete }) => {
     const [emergencyPhone, setEmergencyPhone] = useState('');
     const [emergencyRelationship, setEmergencyRelationship] = useState('');
     const [emergencyDetails, setEmergencyDetails] = useState('');
+
+    // UI & Loading State
     const [isLoading, setIsLoading] = useState(false);
+    const [showAccountList, setShowAccountList] = useState(false);
+    const [accounts, setAccounts] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [isFetchingAccounts, setIsFetchingAccounts] = useState(false);
+
+    const fetchAccounts = async () => {
+        setIsFetchingAccounts(true);
+        try {
+            const { data, error } = await supabase
+                .from('health_monitor')
+                .select('*')
+                .order('patient_name', { ascending: true });
+
+            if (error) throw error;
+            setAccounts(data || []);
+        } catch (error) {
+            console.error('Error fetching accounts:', error);
+        } finally {
+            setIsFetchingAccounts(false);
+        }
+    };
+
+    useEffect(() => {
+        if (showAccountList) {
+            fetchAccounts();
+        }
+    }, [showAccountList]);
+
+    const handleAccountSelect = (account) => {
+        const patientData = {
+            name: account.patient_name,
+            phone: account.short_id,
+            age: account.patient_age,
+            gender: account.patient_gender,
+            weight: account.patient_weight,
+            height: account.patient_height,
+            usePump: account.use_pump,
+            emergencyName: account.emergency_name,
+            emergencyPhone: account.emergency_phone,
+            emergencyRelationship: account.emergency_relationship,
+            emergencyDetails: account.emergency_details,
+            bloodType: 'O+'
+        };
+        localStorage.setItem('mueen_session', JSON.stringify(patientData));
+        onComplete(account.short_id, patientData);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -69,10 +118,86 @@ const RegisterView = ({ onComplete }) => {
         }
     };
 
+    const filteredAccounts = accounts.filter(acc =>
+        (acc.patient_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (acc.short_id?.includes(searchTerm))
+    );
+
+    if (showAccountList) {
+        return (
+            <div className="min-h-screen flex flex-col p-4 sm:p-6 items-center justify-center animate-in fade-in duration-700" style={{ backgroundColor: '#090314' }}>
+                <div className="w-full max-w-sm sm:max-w-md space-y-6">
+                    <div className="text-center">
+                        <div className="w-16 h-16 bg-mueen-cyan/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-mueen-cyan/20">
+                            <Users className="w-8 h-8 text-mueen-cyan" />
+                        </div>
+                        <h1 className="text-xl font-bold text-white mb-1">اختيار حساب موجود</h1>
+                        <p className="text-gray-400 text-[10px]">اختر ملفك الشخصي للمتابعة</p>
+                    </div>
+
+                    <div className="glass-panel p-1 border-white/5 bg-white/5">
+                        <div className="flex items-center px-4 py-2 gap-3">
+                            <Search className="text-gray-500 w-4 h-4" />
+                            <input
+                                type="text"
+                                placeholder="بحث بالاسم أو رقم الجوال..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="bg-transparent border-none text-white text-xs focus:ring-0 flex-1 text-right outline-none"
+                                dir="rtl"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                        {isFetchingAccounts ? (
+                            <div className="text-center py-8">
+                                <Activity className="w-6 h-6 text-mueen-cyan animate-pulse mx-auto mb-2" />
+                                <p className="text-gray-500 text-xs">جاري تحميل الحسابات...</p>
+                            </div>
+                        ) : filteredAccounts.length > 0 ? (
+                            filteredAccounts.map((acc) => (
+                                <button
+                                    key={acc.short_id}
+                                    onClick={() => handleAccountSelect(acc)}
+                                    className="w-full glass-panel p-4 border-white/5 bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-between group"
+                                >
+                                    <ChevronLeft className="w-4 h-4 text-gray-600 group-hover:text-mueen-cyan transition-colors" />
+                                    <div className="text-right">
+                                        <p className="text-white text-sm font-bold">{acc.patient_name}</p>
+                                        <p className="text-gray-500 text-[10px]">{acc.short_id}</p>
+                                    </div>
+                                </button>
+                            ))
+                        ) : (
+                            <div className="text-center py-8">
+                                <p className="text-gray-500 text-xs text-center leading-relaxed">لم يتم العثور على حسابات مطابقة</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <button
+                        onClick={() => setShowAccountList(false)}
+                        className="w-full py-4 border border-white/10 text-gray-400 font-bold rounded-xl hover:bg-white/5 transition-colors text-sm"
+                    >
+                        العودة لإنشاء حساب جديد
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen flex flex-col p-4 sm:p-6 items-center justify-center animate-in fade-in duration-700" style={{ backgroundColor: '#090314' }}>
             <div className="w-full max-w-sm sm:max-w-md space-y-6">
-                <div className="text-center">
+                <div className="text-center relative">
+                    <button
+                        onClick={() => setShowAccountList(true)}
+                        className="absolute top-0 right-0 text-mueen-cyan text-[10px] bg-mueen-cyan/10 px-3 py-1.5 rounded-lg hover:bg-mueen-cyan/20 transition-colors border border-mueen-cyan/20"
+                    >
+                        اختيار حساب
+                    </button>
+
                     <div className="w-16 h-16 bg-mueen-cyan/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-mueen-cyan/20">
                         <HeartPulse className="w-8 h-8 text-mueen-cyan" />
                     </div>
