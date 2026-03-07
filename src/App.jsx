@@ -445,17 +445,33 @@ const App = () => {
     useEffect(() => {
         let interval;
         if (isPumping) {
-            interval = setInterval(() => {
+            interval = setInterval(async () => {
+                let newGlucagon;
+                let newGlucose;
+
                 setGlucagon(prev => {
-                    const nextVal = Math.max(0, prev - 0.02);
-                    return parseFloat(nextVal.toFixed(2));
+                    newGlucagon = Math.max(0, prev - 0.02);
+                    return parseFloat(newGlucagon.toFixed(2));
                 });
-                setGlucose(prev => Math.min(prev + 3, STABLE_TARGET)); // Directly increase actual glucose for UI to show immediately
+
+                setGlucose(prev => {
+                    newGlucose = Math.min(prev + 3, STABLE_TARGET);
+                    return newGlucose;
+                });
+
                 setTargetGlucose(prev => Math.min(prev + 3, STABLE_TARGET));
+
+                // Push the live pumping update to the database so the other client sees the numbers move
+                if (patientSessionId) {
+                    await supabase.from('health_monitor').update({
+                        glucose: newGlucose,
+                        glucagon: parseFloat(newGlucagon.toFixed(2))
+                    }).eq('short_id', patientSessionId);
+                }
             }, 500);
         }
         return () => clearInterval(interval);
-    }, [isPumping]);
+    }, [isPumping, patientSessionId]);
 
     useEffect(() => {
         if (isPumping && glucose >= STABLE_TARGET) {
