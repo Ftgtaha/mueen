@@ -219,11 +219,10 @@ const App = () => {
 
         const interval = setInterval(() => {
             let stepSizeG = 2;
-            if (scenario === 'paused') {
-                return; // Freeze the simulation entirely
-            }
             if (isPumping) {
-                stepSizeG = 6;
+                stepSizeG = 25;
+            } else if (scenario === 'paused') {
+                return; // Freeze the simulation entirely
             } else if (scenario === 'pre_hypo' || scenario === 'normal' || scenario === 'recovering' || scenario === 'recovery') {
                 stepSizeG = 1;
             } else if (scenario === 'hyper') {
@@ -434,7 +433,7 @@ const App = () => {
                     const nextVal = Math.max(0, prev - 0.1);
                     return parseFloat(nextVal.toFixed(1));
                 });
-                setTargetGlucose(prev => prev + 12);
+                setTargetGlucose(prev => prev + 25);
             }, 1000);
         }
         return () => clearInterval(interval);
@@ -476,6 +475,7 @@ const App = () => {
         } else {
             if (glucagon > 0) {
                 setIsPumping(true);
+                setScenario('recovering'); // Unpause the simulation
                 setAlertText("جاري الضخ تدريجياً...");
             } else {
                 setAlertText("عذراً، المحقنة فارغة! يرجى إعادة التعبئة قبل الضخ.");
