@@ -433,6 +433,7 @@ const App = () => {
             patient_name: patientData.name || "مستخدِم مُعين",
             glucose: newG,
             ketones: newK,
+            glucagon: glucagon, // Save current glucagon so it doesn't get wiped
             scenario: targetScenario,
             alert_text: "جاري مراقبة حالتك..."
         });
@@ -506,7 +507,8 @@ const App = () => {
                 setAlertText(startMsg);
                 await supabase.from('health_monitor').update({
                     scenario: 'recovering',
-                    alert_text: startMsg
+                    alert_text: startMsg,
+                    glucagon: glucagon // Preserve current tank level
                 }).eq('short_id', patientSessionId);
             } else {
                 setAlertText("عذراً، المحقنة فارغة! يرجى إعادة التعبئة قبل الضخ.");
