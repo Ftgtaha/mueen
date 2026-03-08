@@ -551,7 +551,7 @@ const App = () => {
         }
     };
 
-    const handleLogout = () => {
+    const handleExitToSelection = () => {
         localStorage.removeItem('mueen_session');
         setPatientSessionId(null);
         setIsSidebarOpen(false);
@@ -563,6 +563,16 @@ const App = () => {
             setIsAdminView(false);
             setIsParentView(false);
         }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('mueen_session');
+        setPatientSessionId(null);
+        setIsSidebarOpen(false);
+        setSelectedRole(null);
+        setIsRegistered(false);
+        setIsAdminView(false);
+        setIsParentView(false);
     };
 
     const handleRefill = async () => {
@@ -663,7 +673,7 @@ const App = () => {
                                     </button>
                                     {isParentView && (
                                         <button
-                                            onClick={handleLogout}
+                                            onClick={handleExitToSelection}
                                             className="p-2 px-6 bg-red-500/10 rounded-xl border border-red-500/20 text-[10px] text-red-400 flex items-center justify-center gap-2 hover:bg-red-500/20 transition-all font-bold"
                                         >
                                             <LogOut className="w-3 h-3" />
