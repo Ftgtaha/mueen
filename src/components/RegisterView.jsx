@@ -25,19 +25,55 @@ const RegisterView = ({ onComplete }) => {
 
     const fetchAccounts = async () => {
         setIsFetchingAccounts(true);
+        let allAccounts = [];
+
         try {
+            // 1. Try to fetch from Supabase
             const { data, error } = await supabase
                 .from('health_monitor')
                 .select('*')
                 .order('patient_name', { ascending: true });
 
-            if (error) throw error;
-            setAccounts(data || []);
+            if (!error && data) {
+                allAccounts = [...data];
+            }
         } catch (error) {
-            console.error('Error fetching accounts:', error);
-        } finally {
-            setIsFetchingAccounts(false);
+            console.warn('Supabase fetch failed, relying on local data');
         }
+
+        // 2. Merge with local accounts
+        const localRaw = localStorage.getItem('mueen_local_accounts');
+        if (localRaw) {
+            try {
+                const localList = JSON.parse(localRaw);
+                localList.forEach(la => {
+                    const id = la.short_id || la.phone;
+                    const exists = allAccounts.find(aa => (aa.short_id || aa.phone) === id);
+                    if (!exists) {
+                        // Normalize to match UI requirements (snake_case)
+                        allAccounts.push({
+                            short_id: id,
+                            patient_name: la.patient_name || la.name,
+                            patient_age: la.patient_age || la.age,
+                            patient_gender: la.patient_gender || la.gender,
+                            patient_weight: la.patient_weight || la.weight,
+                            patient_height: la.patient_height || la.height,
+                            use_pump: la.use_pump !== undefined ? la.use_pump : la.usePump,
+                            emergency_name: la.emergency_name || la.emergencyName,
+                            emergency_phone: la.emergency_phone || la.emergencyPhone,
+                            emergency_relationship: la.emergency_relationship || la.emergencyRelationship,
+                            emergency_details: la.emergency_details || la.emergencyDetails,
+                            bloodType: la.bloodType || 'O+'
+                        });
+                    }
+                });
+            } catch (e) {
+                console.error('Error parsing local accounts', e);
+            }
+        }
+
+        setAccounts(allAccounts);
+        setIsFetchingAccounts(false);
     };
 
     useEffect(() => {
@@ -48,21 +84,21 @@ const RegisterView = ({ onComplete }) => {
 
     const handleAccountSelect = (account) => {
         const patientData = {
-            name: account.patient_name,
-            phone: account.short_id,
-            age: account.patient_age,
-            gender: account.patient_gender,
-            weight: account.patient_weight,
-            height: account.patient_height,
-            usePump: account.use_pump,
-            emergencyName: account.emergency_name,
-            emergencyPhone: account.emergency_phone,
-            emergencyRelationship: account.emergency_relationship,
-            emergencyDetails: account.emergency_details,
+            name: account.patient_name || account.name,
+            phone: account.short_id || account.phone,
+            age: account.patient_age || account.age,
+            gender: account.patient_gender || account.gender,
+            weight: account.patient_weight || account.weight,
+            height: account.patient_height || account.height,
+            usePump: account.use_pump !== undefined ? account.use_pump : account.usePump,
+            emergencyName: account.emergency_name || account.emergencyName,
+            emergencyPhone: account.emergency_phone || account.emergencyPhone,
+            emergencyRelationship: account.emergency_relationship || account.emergencyRelationship,
+            emergencyDetails: account.emergency_details || account.emergencyDetails,
             bloodType: 'O+'
         };
         localStorage.setItem('mueen_session', JSON.stringify(patientData));
-        onComplete(account.short_id, patientData);
+        onComplete(patientData.phone, patientData);
     };
 
     const handleSubmit = async (e) => {
@@ -86,6 +122,7 @@ const RegisterView = ({ onComplete }) => {
         };
 
         try {
+            // Try Supabase first
             const { error } = await supabase
                 .from('health_monitor')
                 .upsert({
@@ -106,13 +143,66 @@ const RegisterView = ({ onComplete }) => {
                     emergency_details: emergencyDetails
                 });
 
-            if (error) throw error;
+            // Save locally in normalized format (snake_case) for "Local Storage Mode"
+            const localData = {
+                short_id: phone,
+                patient_name: name,
+                patient_age: age,
+                patient_gender: gender,
+                patient_weight: weight,
+                patient_height: height,
+                use_pump: usePump,
+                emergency_name: emergencyName,
+                emergency_phone: emergencyPhone,
+                emergency_relationship: emergencyRelationship,
+                emergency_details: emergencyDetails,
+                bloodType: 'O+',
+                scenario: 'standby',
+                glucose: 110,
+                glucagon: 5.0
+            };
 
-            localStorage.setItem('mueen_session', JSON.stringify(patientData));
-            onComplete(phone, patientData);
+            const localRaw = localStorage.getItem('mueen_local_accounts');
+            let localList = localRaw ? JSON.parse(localRaw) : [];
+
+            // Avoid duplicates in local list
+            localList = localList.filter(a => (a.short_id || a.phone) !== phone);
+            localList.push(localData);
+            localStorage.setItem('mueen_local_accounts', JSON.stringify(localList));
+
+            localStorage.setItem('mueen_session', JSON.stringify(localData));
+            onComplete(phone, localData);
+
         } catch (error) {
-            console.error('Registration error:', error);
-            alert('حدث خطأ أثناء التسجيل، يرجى المحاولة مرة أخرى.');
+            console.error('Registration using Local storage only:', error);
+
+            // Define localData here as well if the try block failed early
+            const offlineData = {
+                short_id: phone,
+                patient_name: name,
+                patient_age: age,
+                patient_gender: gender,
+                patient_weight: weight,
+                patient_height: height,
+                use_pump: usePump,
+                emergency_name: emergencyName,
+                emergency_phone: emergencyPhone,
+                emergency_relationship: emergencyRelationship,
+                emergency_details: emergencyDetails,
+                bloodType: 'O+',
+                scenario: 'standby',
+                glucose: 110,
+                glucagon: 5.0
+            };
+
+            const localRaw = localStorage.getItem('mueen_local_accounts');
+            let localList = localRaw ? JSON.parse(localRaw) : [];
+            localList = localList.filter(a => (a.short_id || a.phone) !== phone);
+            localList.push(offlineData);
+            localStorage.setItem('mueen_local_accounts', JSON.stringify(localList));
+
+            localStorage.setItem('mueen_session', JSON.stringify(offlineData));
+            onComplete(phone, offlineData);
         } finally {
             setIsLoading(false);
         }

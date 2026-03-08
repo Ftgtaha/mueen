@@ -14,13 +14,14 @@ import PatientSelectionView from './components/PatientSelectionView';
 import PatientProfileView from './components/PatientProfileView';
 import LabResultsView from './components/LabResultsView';
 import EntryView from './components/EntryView';
-import { Menu, User, Settings, AlertTriangle, Users, Volume2, Smartphone } from 'lucide-react';
+import { Menu, User, Settings, AlertTriangle, Users, Volume2, Smartphone, LogOut } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
 const App = () => {
     // Session & User State
-    const [selectedRole, setSelectedRole] = useState(null); // 'patient' or 'admin' or null
+    const [selectedRole, setSelectedRole] = useState(null); // 'patient' or 'admin' or 'parent'
     const [isAdminView, setIsAdminView] = useState(false);
+    const [isParentView, setIsParentView] = useState(false);
     const [isRegistered, setIsRegistered] = useState(false);
     const [showChangeDevice, setShowChangeDevice] = useState(false);
     const [patientSessionId, setPatientSessionId] = useState(null);
@@ -553,10 +554,11 @@ const App = () => {
     const handleLogout = () => {
         localStorage.removeItem('mueen_session');
         setPatientSessionId(null);
-        setIsRegistered(false);
         setIsSidebarOpen(false);
         setSelectedRole(null);
+        setIsRegistered(false);
         setIsAdminView(false);
+        setIsParentView(false);
     };
 
     const handleRefill = async () => {
@@ -577,6 +579,9 @@ const App = () => {
             setHasInteracted(true);
             if (role === 'admin') {
                 setIsAdminView(true);
+            }
+            if (role === 'parent') {
+                setIsParentView(true);
             }
         }} />;
     }
@@ -617,101 +622,182 @@ const App = () => {
             />
 
             <main className="p-4 space-y-6">
-                {isAdminView && !patientSessionId ? (
-                    <PatientSelectionView onSelect={(p) => {
-                        setPatientSessionId(p.short_id);
-                        setPatientData({
-                            name: p.patient_name,
-                            phone: p.short_id,
-                            age: p.patient_age || 24,
-                            gender: p.patient_gender || 'غير محدد',
-                            weight: p.patient_weight || '--',
-                            height: p.patient_height || '--',
-                            usePump: p.use_pump || false,
-                            emergencyName: p.emergency_name,
-                            emergencyPhone: p.emergency_phone,
-                            bloodType: 'O+'
-                        });
-                        setGlucose(p.glucose || 110);
-                        setGlucagon(p.glucagon !== undefined ? p.glucagon : 100);
-                        setScenario(p.scenario || 'standby');
-                        setHasResult(true);
-                    }} />
-                ) : activeView === 'dashboard' ? (
-                    <>
-                        {isAdminView && (
-                            <button
-                                onClick={() => setPatientSessionId(null)}
-                                className="w-full mb-4 p-2 bg-white/5 rounded-xl border border-white/10 text-[10px] text-gray-500 flex items-center justify-center gap-2 hover:bg-white/10 transition-colors"
-                            >
-                                <Users className="w-3 h-3" />
-                                تغيير المريض الحالي
-                            </button>
-                        )}
-                        <div className="glass-panel p-4 flex items-center justify-between mb-2" style={{ backgroundColor: 'rgba(26, 11, 60, 0.45)', border: '1px solid rgba(41, 121, 255, 0.2)' }}>
-                            <div className="flex items-center space-x-3 space-x-reverse">
-                                <div className="w-10 h-10 rounded-full bg-mueen-blue/20 flex items-center justify-center">
-                                    <User className="text-mueen-cyan w-5 h-5" />
+                {activeView === 'dashboard' ? (
+                    (isAdminView || isParentView) ? (
+                        !patientSessionId ? (
+                            <PatientSelectionView onSelect={async (p) => {
+                                setPatientSessionId(p.short_id);
+                                setPatientData({
+                                    name: p.patient_name,
+                                    phone: p.short_id,
+                                    age: p.patient_age || 24,
+                                    gender: p.patient_gender || 'غير محدد',
+                                    weight: p.patient_weight || '--',
+                                    height: p.patient_height || '--',
+                                    usePump: p.use_pump || false,
+                                    emergencyName: p.emergency_name,
+                                    emergencyPhone: p.emergency_phone,
+                                    bloodType: 'O+'
+                                });
+                                setGlucose(p.glucose || 110);
+                                setGlucagon(p.glucagon !== undefined ? p.glucagon : 100);
+                                setScenario(p.scenario || 'standby');
+                                setHasResult(true);
+                            }} />
+                        ) : (
+                            <>
+                                <div className="flex gap-2 mb-4">
+                                    <button
+                                        onClick={() => {
+                                            setPatientSessionId(null);
+                                            setScenario('standby');
+                                        }}
+                                        className="flex-1 p-2 bg-white/5 rounded-xl border border-white/10 text-[10px] text-gray-400 flex items-center justify-center gap-2 hover:bg-white/10 transition-colors"
+                                    >
+                                        <Users className="w-3 h-3 text-mueen-cyan" />
+                                        {isParentView ? 'تغيير الطفل / المريض' : 'تغيير المريض الحالي'}
+                                    </button>
+                                    {isParentView && (
+                                        <button
+                                            onClick={handleLogout}
+                                            className="p-2 px-6 bg-red-500/10 rounded-xl border border-red-500/20 text-[10px] text-red-400 flex items-center justify-center gap-2 hover:bg-red-500/20 transition-all font-bold"
+                                        >
+                                            <LogOut className="w-3 h-3" />
+                                            خروج
+                                        </button>
+                                    )}
                                 </div>
-                                <div>
-                                    <h3 className="text-white text-sm font-bold leading-none">{patientData.name}</h3>
-                                    <p className="text-[9px] text-gray-500 mt-1.5 flex gap-2 items-center">
-                                        <span>{patientData.age} سنة</span>
-                                        <span className="opacity-30">|</span>
-                                        <span>{patientData.gender}</span>
-                                        <span className="opacity-30">|</span>
-                                        <span>{patientData.weight}كجم</span>
-                                        <span className="opacity-30">|</span>
-                                        <span>{patientData.height}سم</span>
-                                        {patientData.usePump && (
-                                            <>
+                                <div className="glass-panel p-4 flex items-center justify-between mb-2" style={{ backgroundColor: 'rgba(26, 11, 60, 0.45)', border: '1px solid rgba(41, 121, 255, 0.2)' }}>
+                                    <div className="flex items-center space-x-3 space-x-reverse">
+                                        <div className="w-10 h-10 rounded-full bg-mueen-blue/20 flex items-center justify-center">
+                                            <User className="text-mueen-cyan w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-white text-sm font-bold leading-none">{patientData.name}</h3>
+                                            <p className="text-[9px] text-gray-500 mt-1.5 flex gap-2 items-center">
+                                                <span>{patientData.age} سنة</span>
                                                 <span className="opacity-30">|</span>
-                                                <span className="text-mueen-cyan font-bold">مضخة</span>
-                                            </>
-                                        )}
+                                                <span>{patientData.gender}</span>
+                                                <span className="opacity-30">|</span>
+                                                <span>{patientData.weight}كجم</span>
+                                                <span className="opacity-30">|</span>
+                                                <span>{patientData.height}سم</span>
+                                                {patientData.usePump && (
+                                                    <>
+                                                        <span className="opacity-30">|</span>
+                                                        <span className="text-mueen-cyan font-bold">مضخة</span>
+                                                    </>
+                                                )}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className={`${isParentView ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-mueen-cyan/10 text-mueen-cyan'} px-2 py-1 rounded text-[8px] font-bold uppercase animate-pulse`}>
+                                        {isAdminView ? 'Admin Mode' : isParentView ? 'Guardian / Parent Mode' : 'Monitoring ON'}
+                                    </div>
+                                </div>
+
+                                <MueenAvatar
+                                    scenario={scenario}
+                                    alertText={alertText}
+                                    isSpeaking={isSpeaking}
+                                    isMuted={isMuted}
+                                    setIsMuted={setIsMuted}
+                                />
+
+                                <VitalsDisplay
+                                    glucose={glucose}
+                                    ketones={ketones}
+                                    battery={battery}
+                                    glucagonLevel={glucagon}
+                                    isPumping={isPumping}
+                                    isScanning={isScanning}
+                                    hasResult={hasResult}
+                                    requiredDose={requiredDose}
+                                    onHardwareInject={handleHardwareInject}
+                                    onRefill={handleRefill}
+                                />
+
+                                {hasResult && (
+                                    <div className="animate-in fade-in zoom-in duration-1000">
+                                        <LiveVitalsChart data={chartData} />
+                                    </div>
+                                )}
+
+                                <div className="flex gap-2">
+                                    <div className="glass-panel p-4 border-mueen-blue/20 bg-mueen-blue/[0.05] flex-1">
+                                        <p className="text-[11px] text-gray-400 leading-relaxed text-right">
+                                            <span className="text-mueen-cyan font-bold ml-1 uppercase">AI Tip:</span>
+                                            يقوم الجهاز بالفحص المجهري (Micro-needle) وتحديد الجرعة بدقة 100٪ بناءً على حالتك اللحظية.
+                                        </p>
+                                    </div>
+                                </div>
+                            </>
+                        )
+                    ) : (
+                        <>
+                            <div className="glass-panel p-4 flex items-center justify-between mb-2" style={{ backgroundColor: 'rgba(26, 11, 60, 0.45)', border: '1px solid rgba(41, 121, 255, 0.2)' }}>
+                                <div className="flex items-center space-x-3 space-x-reverse">
+                                    <div className="w-10 h-10 rounded-full bg-mueen-blue/20 flex items-center justify-center">
+                                        <User className="text-mueen-cyan w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-white text-sm font-bold leading-none">{patientData.name}</h3>
+                                        <p className="text-[9px] text-gray-500 mt-1.5 flex gap-2 items-center">
+                                            <span>{patientData.age} سنة</span>
+                                            <span className="opacity-30">|</span>
+                                            <span>{patientData.gender}</span>
+                                            <span className="opacity-30">|</span>
+                                            <span>{patientData.weight}كجم</span>
+                                            <span className="opacity-30">|</span>
+                                            <span>{patientData.height}سم</span>
+                                            {patientData.usePump && (
+                                                <>
+                                                    <span className="opacity-30">|</span>
+                                                    <span className="text-mueen-cyan font-bold">مضخة</span>
+                                                </>
+                                            )}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="bg-mueen-cyan/10 text-mueen-cyan px-2 py-1 rounded text-[8px] font-bold uppercase animate-pulse">
+                                    Monitoring ON
+                                </div>
+                            </div>
+
+                            <MueenAvatar
+                                scenario={scenario}
+                                alertText={alertText}
+                                isSpeaking={isSpeaking}
+                                isMuted={isMuted}
+                                setIsMuted={setIsMuted}
+                            />
+
+                            <VitalsDisplay
+                                glucose={glucose}
+                                ketones={ketones}
+                                battery={battery}
+                                glucagonLevel={glucagon}
+                                isPumping={isPumping}
+                                isScanning={isScanning}
+                                hasResult={hasResult}
+                                requiredDose={requiredDose}
+                                onHardwareInject={handleHardwareInject}
+                                onRefill={handleRefill}
+                            />
+
+                            {hasResult && (
+                                <div className="animate-in fade-in zoom-in duration-1000">
+                                    <LiveVitalsChart data={chartData} />
+                                </div>
+                            )}
+
+                            <div className="flex gap-2">
+                                <div className="glass-panel p-4 border-mueen-blue/20 bg-mueen-blue/[0.05] flex-1">
+                                    <p className="text-[11px] text-gray-400 leading-relaxed text-right">
+                                        <span className="text-mueen-cyan font-bold ml-1 uppercase">AI Tip:</span>
+                                        يقوم الجهاز بالفحص المجهري (Micro-needle) وتحديد الجرعة بدقة 100٪ بناءً على حالتك اللحظية.
                                     </p>
                                 </div>
-                            </div>
-                            <div className="bg-mueen-cyan/10 px-2 py-1 rounded text-[8px] text-mueen-cyan font-bold uppercase animate-pulse">
-                                {isAdminView ? 'Admin Mode' : 'Monitoring ON'}
-                            </div>
-                        </div>
-
-                        <MueenAvatar
-                            scenario={scenario}
-                            alertText={alertText}
-                            isSpeaking={isSpeaking}
-                            isMuted={isMuted}
-                            setIsMuted={setIsMuted}
-                        />
-
-                        <VitalsDisplay
-                            glucose={glucose}
-                            ketones={ketones}
-                            battery={battery}
-                            glucagonLevel={glucagon}
-                            isPumping={isPumping}
-                            isScanning={isScanning}
-                            hasResult={hasResult}
-                            requiredDose={requiredDose}
-                            onHardwareInject={handleHardwareInject}
-                            onRefill={handleRefill}
-                        />
-
-                        {hasResult && (
-                            <div className="animate-in fade-in zoom-in duration-1000">
-                                <LiveVitalsChart data={chartData} />
-                            </div>
-                        )}
-
-                        <div className="flex gap-2">
-                            <div className="glass-panel p-4 border-mueen-blue/20 bg-mueen-blue/[0.05] flex-1">
-                                <p className="text-[11px] text-gray-400 leading-relaxed text-right">
-                                    <span className="text-mueen-cyan font-bold ml-1 uppercase">AI Tip:</span>
-                                    يقوم الجهاز بالفحص المجهري (Micro-needle) وتحديد الجرعة بدقة 100٪ بناءً على حالتك اللحظية.
-                                </p>
-                            </div>
-                            {!isAdminView && (
                                 <button
                                     onClick={() => setShowChangeDevice(true)}
                                     className="px-6 py-4 bg-mueen-cyan/10 border border-mueen-cyan/40 rounded-2xl hover:bg-mueen-cyan/20 transition-all flex flex-col items-center justify-center gap-1 group shadow-[0_0_20px_rgba(41,255,255,0.1)] active:scale-95 border-dashed"
@@ -719,9 +805,9 @@ const App = () => {
                                     <Smartphone className="w-5 h-5 text-mueen-cyan group-hover:scale-110 transition-transform" />
                                     <span className="text-[10px] text-mueen-cyan font-black whitespace-nowrap">تغيير الجهاز</span>
                                 </button>
-                            )}
-                        </div>
-                    </>
+                            </div>
+                        </>
+                    )
                 ) : activeView === 'reports' ? (
                     <ReportsView onBack={() => setActiveView('dashboard')} />
                 ) : activeView === 'profile' ? (
@@ -767,19 +853,17 @@ const App = () => {
                 onClose={() => setShowCalibration(false)}
             />
 
-            {
-                isAdminView && patientSessionId && activeView === 'dashboard' && (
-                    <PresenterControlPanel
-                        currentScenario={scenario}
-                        onStartEmergency={startRescueScan}
-                        onHardwareInject={handleHardwareInject}
-                        onRefill={handleRefill}
-                        glucagon={glucagon}
-                        isPumping={isPumping}
-                        requiredDose={requiredDose}
-                    />
-                )
-            }
+            {isAdminView && patientSessionId && activeView === 'dashboard' && (
+                <PresenterControlPanel
+                    onStartEmergency={startRescueScan}
+                    onHardwareInject={handleHardwareInject}
+                    onRefill={handleRefill}
+                    currentScenario={scenario}
+                    glucagon={glucagon}
+                    isPumping={isPumping}
+                    requiredDose={requiredDose}
+                />
+            )}
 
             {showChangeDevice && (
                 <PairingModal
