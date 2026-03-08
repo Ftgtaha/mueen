@@ -555,10 +555,14 @@ const App = () => {
         localStorage.removeItem('mueen_session');
         setPatientSessionId(null);
         setIsSidebarOpen(false);
-        setSelectedRole(null);
-        setIsRegistered(false);
-        setIsAdminView(false);
-        setIsParentView(false);
+
+        // If it's a parent, just go back to patient selection, don't exit to entry screen
+        if (!isParentView) {
+            setSelectedRole(null);
+            setIsRegistered(false);
+            setIsAdminView(false);
+            setIsParentView(false);
+        }
     };
 
     const handleRefill = async () => {
