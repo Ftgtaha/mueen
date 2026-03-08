@@ -14,7 +14,7 @@ import PatientSelectionView from './components/PatientSelectionView';
 import PatientProfileView from './components/PatientProfileView';
 import LabResultsView from './components/LabResultsView';
 import EntryView from './components/EntryView';
-import { Menu, User, Settings, AlertTriangle, Users, Volume2 } from 'lucide-react';
+import { Menu, User, Settings, AlertTriangle, Users, Volume2, Smartphone } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
 const App = () => {
@@ -22,6 +22,7 @@ const App = () => {
     const [selectedRole, setSelectedRole] = useState(null); // 'patient' or 'admin' or null
     const [isAdminView, setIsAdminView] = useState(false);
     const [isRegistered, setIsRegistered] = useState(false);
+    const [showChangeDevice, setShowChangeDevice] = useState(false);
     const [patientSessionId, setPatientSessionId] = useState(null);
     const [patientData, setPatientData] = useState({
         name: 'جاري التحميل...',
@@ -703,11 +704,22 @@ const App = () => {
                             </div>
                         )}
 
-                        <div className="glass-panel p-4 border-mueen-blue/20 bg-mueen-blue/[0.05]">
-                            <p className="text-[11px] text-gray-400 leading-relaxed text-right">
-                                <span className="text-mueen-cyan font-bold ml-1 uppercase">AI Tip:</span>
-                                يقوم الجهاز بالفحص المجهري (Micro-needle) وتحديد الجرعة بدقة 100٪ بناءً على حالتك اللحظية.
-                            </p>
+                        <div className="flex gap-2">
+                            <div className="glass-panel p-4 border-mueen-blue/20 bg-mueen-blue/[0.05] flex-1">
+                                <p className="text-[11px] text-gray-400 leading-relaxed text-right">
+                                    <span className="text-mueen-cyan font-bold ml-1 uppercase">AI Tip:</span>
+                                    يقوم الجهاز بالفحص المجهري (Micro-needle) وتحديد الجرعة بدقة 100٪ بناءً على حالتك اللحظية.
+                                </p>
+                            </div>
+                            {!isAdminView && (
+                                <button
+                                    onClick={() => setShowChangeDevice(true)}
+                                    className="glass-panel p-4 border-mueen-blue/20 bg-mueen-blue/[0.05] hover:bg-mueen-blue/10 transition-all flex flex-col items-center justify-center gap-1 min-w-[80px]"
+                                >
+                                    <Smartphone className="w-4 h-4 text-mueen-cyan" />
+                                    <span className="text-[8px] text-gray-500 font-bold">تغيير الجهاز</span>
+                                </button>
+                            )}
                         </div>
                     </>
                 ) : activeView === 'reports' ? (
@@ -768,6 +780,17 @@ const App = () => {
                     />
                 )
             }
+
+            {showChangeDevice && (
+                <PairingModal
+                    initialStep="pairing"
+                    onClose={() => setShowChangeDevice(false)}
+                    onPaired={() => {
+                        // In re-pairing mode, we just want to close the modal after success
+                        // (success delay is handled inside PairingModal's useEffect)
+                    }}
+                />
+            )}
 
             {/* Browser Autoplay Satisfaction Overlay (for returning patients) */}
             {!hasInteracted && selectedRole === 'patient' && (

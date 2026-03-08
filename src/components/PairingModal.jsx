@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { QrCode, Smartphone, CheckCircle2, User, Phone, Activity, Heart, Calendar } from 'lucide-react';
 
-const PairingModal = ({ onPaired }) => {
-    const [step, setStep] = useState('profile'); // profile -> emergency -> pairing -> success
+const PairingModal = ({ onPaired, initialStep = 'profile', onClose }) => {
+    const [step, setStep] = useState(initialStep); // profile -> emergency -> pairing -> success
 
     // Patient Profile
     const [patientName, setPatientName] = useState('');
@@ -35,11 +35,31 @@ const PairingModal = ({ onPaired }) => {
         }
     };
 
+    // Auto-trigger success if starting from pairing (Change Device mode)
+    useEffect(() => {
+        if (initialStep === 'pairing') {
+            const t1 = setTimeout(() => setStep('success'), 3000);
+            const t2 = setTimeout(() => {
+                if (onClose) onClose();
+            }, 5000);
+            return () => { clearTimeout(t1); clearTimeout(t2); };
+        }
+    }, [initialStep]);
+
     const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
     return (
-        <div className="fixed inset-0 bg-mueen-dark z-[100] flex items-center justify-center p-6" style={{ backgroundColor: '#090314' }}>
-            <div className="w-full max-w-sm space-y-8 animate-in fade-in zoom-in duration-500">
+        <div className="fixed inset-0 bg-mueen-dark z-[110] flex items-center justify-center p-6 backdrop-blur-md" style={{ backgroundColor: 'rgba(9, 3, 20, 0.95)' }}>
+            <div className="w-full max-w-sm space-y-8 animate-in fade-in zoom-in duration-500 relative">
+
+                {onClose && (
+                    <button
+                        onClick={onClose}
+                        className="absolute -top-12 right-0 p-2 text-gray-500 hover:text-white transition-colors"
+                    >
+                        إغلاق
+                    </button>
+                )}
 
                 <div className="text-center space-y-2">
                     <h1 className="text-3xl font-bold text-white tracking-tight">مُعين (MUEEN)</h1>
