@@ -714,10 +714,10 @@ const App = () => {
                             {!isAdminView && (
                                 <button
                                     onClick={() => setShowChangeDevice(true)}
-                                    className="glass-panel p-4 border-mueen-blue/20 bg-mueen-blue/[0.05] hover:bg-mueen-blue/10 transition-all flex flex-col items-center justify-center gap-1 min-w-[80px]"
+                                    className="px-6 py-4 bg-mueen-cyan/10 border border-mueen-cyan/40 rounded-2xl hover:bg-mueen-cyan/20 transition-all flex flex-col items-center justify-center gap-1 group shadow-[0_0_20px_rgba(41,255,255,0.1)] active:scale-95 border-dashed"
                                 >
-                                    <Smartphone className="w-4 h-4 text-mueen-cyan" />
-                                    <span className="text-[8px] text-gray-500 font-bold">تغيير الجهاز</span>
+                                    <Smartphone className="w-5 h-5 text-mueen-cyan group-hover:scale-110 transition-transform" />
+                                    <span className="text-[10px] text-mueen-cyan font-black whitespace-nowrap">تغيير الجهاز</span>
                                 </button>
                             )}
                         </div>
